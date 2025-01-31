@@ -2,7 +2,7 @@ import streamlit as st
 import json
 
 # 📌 Titre de l'application
-st.title("📌 Gestionnaire de Tâches avec Priorisation")
+st.title("📌 Gestionnaire de Tâches")
 
 # 📌 Sauvegarder les tâches dans un fichier JSON
 def sauvegarder_taches():
@@ -71,7 +71,9 @@ matrice = classifier_taches_eisenhower(st.session_state.taches)
 
 for categorie, liste in matrice.items():
     st.markdown(f"### {categorie}")
-    for tache in liste:
+    # Tri des tâches dans chaque catégorie par urgence et importance (d'abord urgence, puis importance)
+    liste_triee = sorted(liste, key=lambda t: (t['urgence'], t['importance']), reverse=True)
+    for tache in liste_triee:
         dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
         st.write(f"- {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
 
@@ -129,37 +131,28 @@ st.subheader("✏️ Modifier une tâche")
 tache_a_modifier = st.selectbox("Sélectionner la tâche à modifier", [t["nom"] for t in st.session_state.taches])
 
 if tache_a_modifier:
-    tache_selected = next(t for t in st.session_state.taches if t["nom"] == tache_a_modifier)
+    # Trouver la tâche sélectionnée
+    tache_selected = next((t for t in st.session_state.taches if t["nom"] == tache_a_modifier), None)
     
-    nom_modif = st.text_input("Nom de la tâche", value=tache_selected["nom"])
-    urgence_modif = st.slider("Niveau d'urgence", 1, 5, tache_selected["urgence"])
-    importance_modif = st.slider("Niveau d'importance", 1, 5, tache_selected["importance"])
-    
-    options_dependances_modif = [t["nom"] for t in st.session_state.taches]
-    dependances_modif = st.multiselect("Tâches dont cette tâche dépend :", options_dependances_modif, default=tache_selected["dependances"])
+    if tache_selected:
+        nom_modif = st.text_input("Nom de la tâche", value=tache_selected["nom"])
+        urgence_modif = st.slider("Niveau d'urgence", 1, 5, tache_selected["urgence"], key=f"urgence_{tache_selected['nom']}")
+        importance_modif = st.slider("Niveau d'importance", 1, 5, tache_selected["importance"], key=f"importance_{tache_selected['nom']}")
 
-    if st.button("Mettre à jour la tâche"):
-        # Met à jour les informations de la tâche sélectionnée
-        tache_selected["nom"] = nom_modif
-        tache_selected["urgence"] = urgence_modif
-        tache_selected["importance"] = importance_modif
-        tache_selected["dependances"] = dependances_modif
-        sauvegarder_taches()  # Sauvegarder après modification
-        st.success(f"Tâche '{nom_modif}' mise à jour !")
+        options_dependances_modif = [t["nom"] for t in st.session_state.taches]
+        dependances_modif = st.multiselect("Tâches dont cette tâche dépend :", options_dependances_modif, default=tache_selected["dependances"])
 
-# 📌 Supprimer une tâche
-st.subheader("🗑️ Supprimer une tâche")
-tache_a_supprimer = st.selectbox("Sélectionner la tâche à supprimer", [t["nom"] for t in st.session_state.taches])
+        if st.button("Modifier la tâche"):
+            if nom_modif:
+                tache_selected["nom"] = nom_modif
+                tache_selected["urgence"] = urgence_modif
+                tache_selected["importance"] = importance_modif
+                tache_selected["dependances"] = dependances_modif
+                sauvegarder_taches()  # Sauvegarder après modification
+                st.success(f"Tâche '{nom_modif}' modifiée !")
+            else:
+                st.error("Le nom de la tâche est requis.")
 
-if st.button("Supprimer la tâche"):
-    st.session_state.taches = [t for t in st.session_state.taches if t["nom"] != tache_a_supprimer]
-    sauvegarder_taches()  # Sauvegarder après suppression
-    st.success(f"Tâche '{tache_a_supprimer}' supprimée !")
-
-# 📌 Ajouter d'autres tâches après coup
-st.subheader("➕ Ajouter d'autres tâches")
-if st.button("Ajouter une nouvelle tâche"):
-    st.experimental_rerun()  # Recharge la page pour permettre l'ajout d'une nouvelle tâche
 
 
 
