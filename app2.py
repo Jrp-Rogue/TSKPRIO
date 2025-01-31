@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # 📌 Titre de l'application
-st.title("📌 Gestionnaire de Tâches")
+st.title("📌 Gestionnaire de Tâches avec Priorisation")
 
 # 📌 Initialisation des tâches en session
 if "taches" not in st.session_state:
@@ -77,31 +77,36 @@ def classifier_taches_eisenhower(taches):
 def afficher_matrice(matrice):
     """Affiche une matrice d'Eisenhower en visuel avec matplotlib."""
     fig, ax = plt.subplots(figsize=(8, 8))
+    
+    # Créer un fond de couleur pour chaque quadrant
     ax.set_xlim(0, 2)
     ax.set_ylim(0, 2)
-    ax.set_xticks([0.5, 1.5])
-    ax.set_yticks([0.5, 1.5])
     
+    # Grilles et lignes pour délimiter les quadrants
     ax.axhline(y=1, color='black', linewidth=2)
     ax.axvline(x=1, color='black', linewidth=2)
     
-    ax.text(0.25, 1.75, "🔴 Important & Urgent", ha='center', va='center', fontsize=12, fontweight='bold')
-    ax.text(1.75, 1.75, "🟡 Important mais Pas Urgent", ha='center', va='center', fontsize=12, fontweight='bold')
-    ax.text(0.25, 0.25, "🔵 Pas Important mais Urgent", ha='center', va='center', fontsize=12, fontweight='bold')
-    ax.text(1.75, 0.25, "⚪ Pas Important & Pas Urgent", ha='center', va='center', fontsize=12, fontweight='bold')
+    # Définition des titres des quadrants
+    ax.text(0.5, 1.75, "🔴 Important & Urgent", ha='center', va='center', fontsize=12, fontweight='bold', color='white')
+    ax.text(1.5, 1.75, "🟡 Important mais Pas Urgent", ha='center', va='center', fontsize=12, fontweight='bold', color='white')
+    ax.text(0.5, 0.25, "🔵 Pas Important mais Urgent", ha='center', va='center', fontsize=12, fontweight='bold', color='white')
+    ax.text(1.5, 0.25, "⚪ Pas Important & Pas Urgent", ha='center', va='center', fontsize=12, fontweight='bold', color='white')
 
     # Remplir les quadrants avec les tâches
     for categorie, taches_liste in matrice.items():
         for tache in taches_liste:
             if categorie == '🔴 Important & Urgent':
-                ax.text(0.25, 1.5, tache["nom"], ha='center', va='center', fontsize=10, color='red')
+                ax.text(0.5, 1.5, tache["nom"], ha='center', va='center', fontsize=10, color='white', bbox=dict(facecolor='red', alpha=0.7))
             elif categorie == '🟡 Important mais Pas Urgent':
-                ax.text(1.75, 1.5, tache["nom"], ha='center', va='center', fontsize=10, color='orange')
+                ax.text(1.5, 1.5, tache["nom"], ha='center', va='center', fontsize=10, color='white', bbox=dict(facecolor='orange', alpha=0.7))
             elif categorie == '🔵 Pas Important mais Urgent':
-                ax.text(0.25, 0.25, tache["nom"], ha='center', va='center', fontsize=10, color='blue')
+                ax.text(0.5, 0.25, tache["nom"], ha='center', va='center', fontsize=10, color='white', bbox=dict(facecolor='blue', alpha=0.7))
             elif categorie == '⚪ Pas Important & Pas Urgent':
-                ax.text(1.75, 0.25, tache["nom"], ha='center', va='center', fontsize=10, color='gray')
+                ax.text(1.5, 0.25, tache["nom"], ha='center', va='center', fontsize=10, color='white', bbox=dict(facecolor='gray', alpha=0.7))
 
+    ax.set_xticks([0.5, 1.5])
+    ax.set_yticks([0.5, 1.5])
+    
     st.pyplot(fig)
 
 # 📌 Affichage de la matrice d'Eisenhower
@@ -149,7 +154,7 @@ if st.button("Mettre à jour l'ordre"):
     noms_donnes = [nom.strip() for nom in nouvel_ordre.split(",") if nom.strip() in [t["nom"] for t in st.session_state.taches]]
     if len(noms_donnes) == len(st.session_state.taches):
         st.session_state.taches = sorted(st.session_state.taches, key=lambda x: noms_donnes.index(x["nom"]))
-        sauvegarder_taches()
         st.success("Ordre mis à jour ! Rechargez la page pour voir l'effet.")
     else:
         st.error("Tous les noms ne correspondent pas aux tâches existantes.")
+
