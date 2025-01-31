@@ -1,7 +1,7 @@
 import streamlit as st
 
 # 📌 Titre de l'application
-st.title("📌 Gestionnaire de Tâches avec Priorisation")
+st.title("📌 Gestionnaire de Tâches")
 
 # 📌 Initialisation des tâches en session
 if "taches" not in st.session_state:
