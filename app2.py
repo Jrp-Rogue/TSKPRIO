@@ -76,7 +76,7 @@ def classifier_taches_eisenhower(taches):
 # 📌 Affichage de la matrice d'Eisenhower en visuel avec matplotlib
 def afficher_matrice(matrice):
     """Affiche une matrice d'Eisenhower en visuel avec matplotlib."""
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(10, 10))
 
     # Créer un fond de couleur pour chaque quadrant
     ax.set_xlim(0, 2)
@@ -93,24 +93,27 @@ def afficher_matrice(matrice):
         'Pas Important mais Urgent': 'blue',
         'Pas Important & Pas Urgent': 'gray'
     }
-    
+
     # Remplir les quadrants avec les tâches et ajouter des titres
     for categorie, taches_liste in matrice.items():
-        x, y = (0.5, 1.5) if 'Important' in categorie else (1.5, 1.5)
-        if 'Urgent' in categorie:
-            y = 1.5
+        if categorie == 'Important & Urgent':
+            x, y = 0, 1
+        elif categorie == 'Important mais Pas Urgent':
+            x, y = 1, 1
+        elif categorie == 'Pas Important mais Urgent':
+            x, y = 0, 0
         else:
-            y = 0.5
-        
-        # Remplir chaque quadrant
+            x, y = 1, 0
+
+        # Remplir chaque quadrant avec une couleur de fond
         ax.add_patch(plt.Rectangle((x, y), 1, 1, color=colors[categorie], alpha=0.3))
 
         # Ajouter le titre du quadrant
-        ax.text(x + 0.5, y + 1.05, categorie, ha='center', va='center', fontsize=12, fontweight='bold', color='white')
+        ax.text(x + 0.5, y + 1.05, categorie, ha='center', va='center', fontsize=12, fontweight='bold', color='black')
 
         # Ajouter les tâches dans chaque quadrant
         for i, tache in enumerate(taches_liste):
-            ax.text(x + 0.5, y + 1.05 - (i + 1) * 0.15, tache["nom"], ha='center', va='center', fontsize=10, color='white')
+            ax.text(x + 0.5, y + 1.05 - (i + 1) * 0.15, tache["nom"], ha='center', va='center', fontsize=10, color='black')
 
     ax.set_xticks([0.5, 1.5])
     ax.set_yticks([0.5, 1.5])
@@ -161,5 +164,6 @@ taches_ordonnee = prioriser_taches(st.session_state.taches)
 for i, tache in enumerate(taches_ordonnee, 1):
     dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
     st.write(f"{i}. {tache['nom']} (Urgence: {tache['urgence']}, Importance: {tache['importance']}){dependances_str}")
+
 
 
