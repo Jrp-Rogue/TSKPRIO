@@ -53,11 +53,43 @@ if st.button("Ajouter la tâche"):
     else:
         st.error("Le nom de la tâche est requis.")
 
-# 📌 Fonction pour supprimer une tâche
-def supprimer_tache(tache_nom):
-    st.session_state.taches = [t for t in st.session_state.taches if t["nom"] != tache_nom]
-    sauvegarder_taches()
-    st.success(f"Tâche '{tache_nom}' supprimée !")
+# 📌 Suppression d'une tâche
+st.subheader("🗑️ Supprimer une tâche")
+taches_a_supprimer = [t["nom"] for t in st.session_state.taches]
+tache_a_supprimer = st.selectbox("Sélectionner une tâche à supprimer", taches_a_supprimer)
+
+if st.button("Supprimer la tâche"):
+    if tache_a_supprimer:
+        st.session_state.taches = [t for t in st.session_state.taches if t["nom"] != tache_a_supprimer]
+        sauvegarder_taches()
+        st.success(f"Tâche '{tache_a_supprimer}' supprimée !")
+    else:
+        st.error("Aucune tâche sélectionnée.")
+
+# 📌 Modification d'une tâche
+st.subheader("✏️ Modifier une tâche")
+tache_a_modifier = st.selectbox("Sélectionner une tâche à modifier", taches_a_supprimer)
+
+if tache_a_modifier:
+    # Récupérer la tâche à modifier
+    tache_modifiee = next(t for t in st.session_state.taches if t["nom"] == tache_a_modifier)
+
+    # Champs pour modifier les détails de la tâche
+    nouveau_nom = st.text_input("Nom de la tâche", value=tache_modifiee["nom"], key="nom_modify")
+    nouvelle_urgence = st.slider("Niveau d'urgence", 1, 5, tache_modifiee["urgence"], key="urgence_modify")
+    nouvelle_importance = st.slider("Niveau d'importance", 1, 5, tache_modifiee["importance"], key="importance_modify")
+    nouvelles_dependances = st.multiselect("Tâches dont cette tâche dépend", options_dependances, default=tache_modifiee["dependances"], key="dependances_modify")
+
+    if st.button("Modifier la tâche"):
+        if nouveau_nom:
+            tache_modifiee["nom"] = nouveau_nom
+            tache_modifiee["urgence"] = nouvelle_urgence
+            tache_modifiee["importance"] = nouvelle_importance
+            tache_modifiee["dependances"] = nouvelles_dependances
+            sauvegarder_taches()
+            st.success(f"Tâche '{nouveau_nom}' modifiée !")
+        else:
+            st.error("Le nom de la tâche est requis.")
 
 # 📌 Affichage des tâches sous forme de matrice d'Eisenhower
 def classifier_taches_eisenhower(taches):
@@ -170,11 +202,3 @@ taches_ordonnee = prioriser_taches(st.session_state.taches)
 for i, tache in enumerate(taches_ordonnee, 1):
     dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
     st.write(f"{i}. {tache['nom']} (Urgence: {tache['urgence']}, Importance: {tache['importance']}){dependances_str}")
-
-# 📌 Formulaire pour supprimer une tâche
-st.subheader("🗑️ Supprimer une tâche")
-taches_noms = [t["nom"] for t in st.session_state.taches]
-tache_a_supprimer = st.selectbox("Choisir la tâche à supprimer", taches_noms)
-
-if st.button("Supprimer la tâche"):
-    supprimer_tache(tache_a_supprimer)
