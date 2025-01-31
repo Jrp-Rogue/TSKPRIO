@@ -139,6 +139,7 @@ if tache_a_modifier:
     dependances_modif = st.multiselect("Tâches dont cette tâche dépend :", options_dependances_modif, default=tache_selected["dependances"])
 
     if st.button("Mettre à jour la tâche"):
+        # Met à jour les informations de la tâche sélectionnée
         tache_selected["nom"] = nom_modif
         tache_selected["urgence"] = urgence_modif
         tache_selected["importance"] = importance_modif
@@ -159,5 +160,6 @@ if st.button("Supprimer la tâche"):
 st.subheader("➕ Ajouter d'autres tâches")
 if st.button("Ajouter une nouvelle tâche"):
     st.experimental_rerun()  # Recharge la page pour permettre l'ajout d'une nouvelle tâche
+
 
 
