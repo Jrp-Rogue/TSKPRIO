@@ -168,37 +168,20 @@ afficher_matrice(matrice)
 
 # 📌 Plan d'action priorisé
 def prioriser_taches(taches):
-    """Trie les tâches en prenant en compte la priorité et les dépendances."""
-    taches_par_nom = {t['nom']: t for t in taches}
+    """Trie les tâches en prenant en compte l'urgence, l'importance et les dépendances sans les pénaliser."""
+    
+    def score(tache):
+        # Calcul de la priorité sur la base de l'urgence et de l'importance
+        return tache['urgence'] * 2 + tache['importance']  # Poids plus important à l'urgence
 
-    def score(tache, visited=None):
-        if visited is None:
-            visited = set()
-        if tache['nom'] in visited:
-            return float('-inf')  # Évite les boucles infinies
-        visited.add(tache['nom'])
+    # Tri des tâches en fonction de leur score
+    taches_triees = sorted(taches, key=score, reverse=True)
 
-        # Score basé sur la matrice d'Eisenhower
-        if tache in matrice['Important & Urgent']:
-            base_score = 4
-        elif tache in matrice['Important mais Pas Urgent']:
-            base_score = 3
-        elif tache in matrice['Pas Important mais Urgent']:
-            base_score = 2
-        else:
-            base_score = 1
-
-        # Ajustement du score en fonction des dépendances
-        if tache['dependances']:
-            return min(score(taches_par_nom[d], visited) for d in tache['dependances']) - 1
-        return base_score
-
-    return sorted(taches, key=score, reverse=True)
+    return taches_triees
 
 # 📌 Affichage du plan d'action priorisé
 st.subheader("📋 Plan d'Action Priorisé")
 taches_ordonnee = prioriser_taches(st.session_state.taches)
 
 for i, tache in enumerate(taches_ordonnee, 1):
-    dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
-    st.write(f"{i}. {tache['nom']} (Urgence: {tache['urgence']}, Importance: {tache['importance']}){dependances_str}")
+    dependances_str = f" (Dépend de: {', '.
