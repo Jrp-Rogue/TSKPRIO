@@ -184,4 +184,5 @@ st.subheader("📋 Plan d'Action Priorisé")
 taches_ordonnee = prioriser_taches(st.session_state.taches)
 
 for i, tache in enumerate(taches_ordonnee, 1):
-    dependances_str = f" (Dépend de: {', '.
+    dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
+    st.write(f"{i}. {tache['nom']} (Urgence: {tache['urgence']}, Importance: {tache['importance']}){dependances_str}")
