@@ -2,7 +2,7 @@ import streamlit as st
 import json
 
 # 📌 Titre de l'application
-st.title("📌 Gestionnaire de Tâches")
+st.title("📌 Gestionnaire de Tâches avec Priorisation")
 
 # 📌 Sauvegarder les tâches dans un fichier JSON
 def sauvegarder_taches():
@@ -135,12 +135,12 @@ if tache_a_modifier:
     tache_selected = next((t for t in st.session_state.taches if t["nom"] == tache_a_modifier), None)
     
     if tache_selected:
-        nom_modif = st.text_input("Nom de la tâche", value=tache_selected["nom"])
+        nom_modif = st.text_input("Nom de la tâche", value=tache_selected["nom"], key=f"nom_{tache_selected['nom']}")
         urgence_modif = st.slider("Niveau d'urgence", 1, 5, tache_selected["urgence"], key=f"urgence_{tache_selected['nom']}")
         importance_modif = st.slider("Niveau d'importance", 1, 5, tache_selected["importance"], key=f"importance_{tache_selected['nom']}")
 
         options_dependances_modif = [t["nom"] for t in st.session_state.taches]
-        dependances_modif = st.multiselect("Tâches dont cette tâche dépend :", options_dependances_modif, default=tache_selected["dependances"])
+        dependances_modif = st.multiselect("Tâches dont cette tâche dépend :", options_dependances_modif, default=tache_selected["dependances"], key=f"dependances_{tache_selected['nom']}")
 
         if st.button("Modifier la tâche"):
             if nom_modif:
@@ -152,6 +152,7 @@ if tache_a_modifier:
                 st.success(f"Tâche '{nom_modif}' modifiée !")
             else:
                 st.error("Le nom de la tâche est requis.")
+
 
 
 
