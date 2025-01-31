@@ -53,6 +53,12 @@ if st.button("Ajouter la tâche"):
     else:
         st.error("Le nom de la tâche est requis.")
 
+# 📌 Fonction pour supprimer une tâche
+def supprimer_tache(tache_nom):
+    st.session_state.taches = [t for t in st.session_state.taches if t["nom"] != tache_nom]
+    sauvegarder_taches()
+    st.success(f"Tâche '{tache_nom}' supprimée !")
+
 # 📌 Affichage des tâches sous forme de matrice d'Eisenhower
 def classifier_taches_eisenhower(taches):
     """Classe les tâches selon la matrice d'Eisenhower"""
@@ -165,5 +171,10 @@ for i, tache in enumerate(taches_ordonnee, 1):
     dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
     st.write(f"{i}. {tache['nom']} (Urgence: {tache['urgence']}, Importance: {tache['importance']}){dependances_str}")
 
+# 📌 Formulaire pour supprimer une tâche
+st.subheader("🗑️ Supprimer une tâche")
+taches_noms = [t["nom"] for t in st.session_state.taches]
+tache_a_supprimer = st.selectbox("Choisir la tâche à supprimer", taches_noms)
 
-
+if st.button("Supprimer la tâche"):
+    supprimer_tache(tache_a_supprimer)
