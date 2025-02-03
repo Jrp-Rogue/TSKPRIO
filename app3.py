@@ -123,3 +123,33 @@ if projet_selectionne:
 
     matrice = classifier_taches_eisenhower(st.session_state.projets[projet_selectionne])
     afficher_matrice(matrice)
+    
+    # 📌 Plan d'action priorisé
+    def prioriser_taches(taches):
+        """Trie les tâches en prenant en compte l'urgence, l'importance et les dépendances."""
+        
+        def score(tache):
+            """Calcul du score basé sur l'urgence et l'importance"""
+            return tache['urgence'] * 2 + tache['importance']  # Poids plus important à l'urgence
+
+        # Trie les tâches par score
+        taches_triees = sorted(taches, key=score, reverse=True)
+
+        # Ordonnancement des tâches en fonction des dépendances
+        ordonnees = []
+        while taches_triees:
+            for tache in taches_triees:
+                if all(dep in [t["nom"] for t in ordonnees] for dep in tache['dependances']):
+                    ordonnees.append(tache)
+                    taches_triees.remove(tache)
+                    break
+
+        return ordonnees
+
+    # 📌 Affichage du plan d'action priorisé
+    st.subheader("📋 Plan d'Action Priorisé")
+    taches_ordonnee = prioriser_taches(st.session_state.projets[projet_selectionne])
+
+    for i, tache in enumerate(taches_ordonnee, 1):
+        dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
+        st.write(f"{i}. {tache['nom']} (Urgence: {tache['urgence']}, Importance: {tache['importance']}){dependances_str}")
