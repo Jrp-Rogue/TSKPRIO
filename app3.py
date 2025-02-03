@@ -77,7 +77,7 @@ if projet_selectionne:
 
     # Suppression du projet
     if st.button("Supprimer le projet"):
-        if st.confirm("Êtes-vous sûr de vouloir supprimer ce projet ?"):
+        if st.confirm_button("Êtes-vous sûr de vouloir supprimer ce projet ?"):
             del st.session_state.projets[projet_selectionne]
             sauvegarder_projets()
             st.success(f"Projet '{projet_selectionne}' supprimé !")
