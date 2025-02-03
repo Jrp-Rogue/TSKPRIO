@@ -100,11 +100,18 @@ if projet_selectionne:
         return matrice
 
     def afficher_matrice(matrice):
-        fig, ax = plt.subplots(figsize=(10, 10))
+        fig, ax = plt.subplots(figsize=(8, 8))
         ax.set_xlim(0, 2)
         ax.set_ylim(0, 2)
         ax.axhline(y=1, color='black', linewidth=2)
         ax.axvline(x=1, color='black', linewidth=2)
+        
+        quadrants = {
+            'Important & Urgent': (1, 1),
+            'Important mais Pas Urgent': (0, 1),
+            'Pas Important mais Urgent': (1, 0),
+            'Pas Important & Pas Urgent': (0, 0)
+        }
         
         colors = {
             'Important & Urgent': 'red', 
@@ -113,12 +120,11 @@ if projet_selectionne:
             'Pas Important & Pas Urgent': 'gray'
         }
         
-        for categorie, taches_liste in matrice.items():
-            x, y = (0, 1) if categorie == 'Important & Urgent' else (1, 1) if categorie == 'Important mais Pas Urgent' else (0, 0) if categorie == 'Pas Important mais Urgent' else (1, 0)
+        for categorie, (x, y) in quadrants.items():
             ax.add_patch(plt.Rectangle((x, y), 1, 1, color=colors[categorie], alpha=0.3))
-            ax.text(x + 0.5, y + 1.05, categorie, ha='center', va='center', fontsize=12, fontweight='bold', color='black')
-            for i, tache in enumerate(taches_liste):
-                ax.text(x + 0.5, y + 1.05 - (i + 1) * 0.15, tache["nom"], ha='center', va='center', fontsize=10, color='black')
+            ax.text(x + 0.5, y + 0.9, categorie, ha='center', va='center', fontsize=12, fontweight='bold', color='black')
+            for i, tache in enumerate(matrice[categorie]):
+                ax.text(x + 0.5, y + 0.7 - (i * 0.15), tache["nom"], ha='center', va='center', fontsize=10, color='black')
         
         ax.axis('off')
         st.pyplot(fig)
