@@ -77,10 +77,10 @@ if projet_selectionne:
 
     # Suppression du projet
     if st.button("Supprimer le projet"):
-    if st.radio("Êtes-vous sûr de vouloir supprimer ce projet ?", ["Non", "Oui"]) == "Oui":
-        del st.session_state.projets[projet_selectionne]
-        sauvegarder_projets()
-        st.success(f"Projet '{projet_selectionne}' supprimé !")
+        if st.radio("Êtes-vous sûr de vouloir supprimer ce projet ?", ["Non", "Oui"]) == "Oui":
+            del st.session_state.projets[projet_selectionne]
+            sauvegarder_projets()
+            st.success(f"Projet '{projet_selectionne}' supprimé !")
             projet_selectionne = None  # Deselect project
 
 # 📌 Initialiser les tâches du projet sélectionné
