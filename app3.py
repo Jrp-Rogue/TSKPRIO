@@ -76,12 +76,22 @@ if projet_selectionne:
             st.warning("Le nom du projet est identique ou vide.")
 
     # Suppression du projet
-    if st.button("Supprimer le projet"):
-        if st.radio("Êtes-vous sûr de vouloir supprimer ce projet ?", ["Non", "Oui"]) == "Oui":
-            del st.session_state.projets[projet_selectionne]
-            sauvegarder_projets()
-            st.success(f"Projet '{projet_selectionne}' supprimé !")
-            projet_selectionne = None  # Deselect project
+if st.button("Supprimer le projet"):
+    if st.radio("Êtes-vous sûr de vouloir supprimer ce projet ?", ["Non", "Oui"]) == "Oui":
+        # Suppression du projet de la session
+        del st.session_state.projets[projet_selectionne]
+        
+        # Sauvegarder les projets après suppression
+        sauvegarder_projets()
+
+        # Message de succès
+        st.success(f"Projet '{projet_selectionne}' supprimé !")
+        
+        # Recharger la liste des projets après suppression pour rafraîchir l'affichage
+        st.session_state.projets = {key: value for key, value in st.session_state.projets.items() if key != projet_selectionne}
+
+        # Recharger les projets depuis le fichier après suppression
+        sauvegarder_projets()
 
 # 📌 Initialiser les tâches du projet sélectionné
 if projet_selectionne:
