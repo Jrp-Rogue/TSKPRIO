@@ -43,40 +43,96 @@ def charger_projets():
 if st.button("Charger les projets sauvegardés"):
     charger_projets()
 
-# 📌 Sélection ou création d'un projet
-st.subheader("📂 Sélectionner ou créer un projet")
-nouveau_projet = st.text_input("Nom du nouveau projet :")
-if st.button("Créer un projet"):
-    if nouveau_projet and nouveau_projet not in st.session_state.projets:
+# 📌 Menu pour choisir ou créer un projet
+st.subheader("📂 Choisir ou créer un projet")
+
+# Liste des projets existants
+projets_existants = list(st.session_state.projets.keys())
+projet_selectionne = st.selectbox("Sélectionner un projet existant", projets_existants)
+
+# Création d'un nouveau projet
+nouveau_projet = st.text_input("Nom du nouveau projet")
+if st.button("Créer un nouveau projet") and nouveau_projet:
+    if nouveau_projet not in st.session_state.projets:
         st.session_state.projets[nouveau_projet] = []
         sauvegarder_projets()
-        st.success(f"Projet '{nouveau_projet}' créé !")
-    elif not nouveau_projet:
-        st.error("Le nom du projet est requis.")
+        st.success(f"Projet '{nouveau_projet}' créé!")
     else:
-        st.warning("Ce projet existe déjà.")
+        st.warning(f"Le projet '{nouveau_projet}' existe déjà!")
 
-projet_selectionne = st.selectbox("Sélectionner un projet", list(st.session_state.projets.keys()), index=0 if st.session_state.projets else None)
+# 📌 Charger les projets sauvegardés
+if st.button("Charger les projets sauvegardés"):
+    charger_projets()
 
+# 📌 Sélectionner un projet pour gérer les tâches
 if projet_selectionne:
-    st.subheader(f"📌 Projet sélectionné : {projet_selectionne}")
-    
+    st.subheader(f"Gestion du projet: {projet_selectionne}")
+
+    # 📌 Initialiser les tâches du projet sélectionné
+    if projet_selectionne not in st.session_state.projets:
+        st.session_state.projets[projet_selectionne] = []
+
     # 📌 Formulaire pour ajouter une tâche
     st.subheader("➕ Ajouter une tâche")
     nom = st.text_input("Nom de la tâche :")
-    urgence = st.slider("Niveau d'urgence", 1, 5, 3)
-    importance = st.slider("Niveau d'importance", 1, 5, 3)
+    urgence = st.slider("Niveau d'urgence", 1, 5, 3, key="urgence_add")
+    importance = st.slider("Niveau d'importance", 1, 5, 3, key="importance_add")
+
+    # 📌 Sélection des dépendances parmi les tâches existantes
     options_dependances = [t["nom"] for t in st.session_state.projets[projet_selectionne]]
-    dependances = st.multiselect("Tâches dont cette tâche dépend :", options_dependances)
-    
+    dependances = st.multiselect("Tâches dont cette tâche dépend :", options_dependances, key="dependances_add")
+
     if st.button("Ajouter la tâche"):
         if nom:
-            nouvelle_tache = {"nom": nom, "urgence": urgence, "importance": importance, "dependances": dependances}
+            nouvelle_tache = {
+                "nom": nom,
+                "urgence": urgence,
+                "importance": importance,
+                "dependances": dependances
+            }
             st.session_state.projets[projet_selectionne].append(nouvelle_tache)
             sauvegarder_projets()
-            st.success(f"Tâche '{nom}' ajoutée !")
+            st.success(f"Tâche '{nom}' ajoutée au projet '{projet_selectionne}'!")
         else:
             st.error("Le nom de la tâche est requis.")
+
+    # 📌 Suppression d'une tâche
+    st.subheader("🗑️ Supprimer une tâche")
+    taches_a_supprimer = [t["nom"] for t in st.session_state.projets[projet_selectionne]]
+    tache_a_supprimer = st.selectbox("Sélectionner une tâche à supprimer", taches_a_supprimer)
+
+    if st.button("Supprimer la tâche"):
+        if tache_a_supprimer:
+            st.session_state.projets[projet_selectionne] = [t for t in st.session_state.projets[projet_selectionne] if t["nom"] != tache_a_supprimer]
+            sauvegarder_projets()
+            st.success(f"Tâche '{tache_a_supprimer}' supprimée du projet '{projet_selectionne}'!")
+        else:
+            st.error("Aucune tâche sélectionnée.")
+
+    # 📌 Modification d'une tâche
+    st.subheader("✏️ Modifier une tâche")
+    tache_a_modifier = st.selectbox("Sélectionner une tâche à modifier", taches_a_supprimer)
+
+    if tache_a_modifier:
+        # Récupérer la tâche à modifier
+        tache_modifiee = next(t for t in st.session_state.projets[projet_selectionne] if t["nom"] == tache_a_modifier)
+
+        # Champs pour modifier les détails de la tâche
+        nouveau_nom = st.text_input("Nom de la tâche", value=tache_modifiee["nom"], key="nom_modify")
+        nouvelle_urgence = st.slider("Niveau d'urgence", 1, 5, tache_modifiee["urgence"], key="urgence_modify")
+        nouvelle_importance = st.slider("Niveau d'importance", 1, 5, tache_modifiee["importance"], key="importance_modify")
+        nouvelles_dependances = st.multiselect("Tâches dont cette tâche dépend", options_dependances, default=tache_modifiee["dependances"], key="dependances_modify")
+
+        if st.button("Modifier la tâche"):
+            if nouveau_nom:
+                tache_modifiee["nom"] = nouveau_nom
+                tache_modifiee["urgence"] = nouvelle_urgence
+                tache_modifiee["importance"] = nouvelle_importance
+                tache_modifiee["dependances"] = nouvelles_dependances
+                sauvegarder_projets()
+                st.success(f"Tâche '{nouveau_nom}' modifiée dans le projet '{projet_selectionne}'!")
+            else:
+                st.error("Le nom de la tâche est requis.")
     
     # 📌 Matrice d'Eisenhower
     def classifier_taches_eisenhower(taches):
