@@ -6,7 +6,7 @@ import base64
 import requests
 
 # Remplir avec ton token GitHub et les informations de ton dépôt
-GITHUB_TOKEN = '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'
+GITHUB_TOKEN = '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'
 REPO_OWNER = 'Jrp-Rogue'
 REPO_NAME = 'TSKPRIO'
 FILE_PATH = 'taches.json'
