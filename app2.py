@@ -35,7 +35,7 @@ if st.button("Charger les tâches sauvegardées"):
 
 # 📌 Fonction de push vers GitHub
 def push_to_github():
-    repo_path = "/path/to/your/repo"  # Le chemin de ton dépôt Git local
+    repo_path = "Jrp-Rogue/TSKPRIO"  # Le chemin de ton dépôt Git local
     repo = Repo(repo_path)
     repo.git.add('taches.json')  # Ajoute le fichier taches.json à l'index
     repo.git.commit('-m', 'Mise à jour des tâches')  # Commit des modifications
