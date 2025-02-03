@@ -2,6 +2,9 @@ import streamlit as st
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import requests
+from git import Repo
 
 # 📌 Titre de l'application
 st.title("📌 Gestionnaire de Tâches")
@@ -15,6 +18,7 @@ def sauvegarder_taches():
     with open("taches.json", "w") as f:
         json.dump(st.session_state.taches, f)
     st.success("Tâches sauvegardées dans taches.json!")
+    push_to_github()  # Push vers GitHub après chaque sauvegarde
 
 # 📌 Fonction pour charger les tâches depuis un fichier JSON
 def charger_taches():
@@ -29,6 +33,15 @@ def charger_taches():
 if st.button("Charger les tâches sauvegardées"):
     charger_taches()
 
+# 📌 Fonction de push vers GitHub
+def push_to_github():
+    repo_path = "/path/to/your/repo"  # Le chemin de ton dépôt Git local
+    repo = Repo(repo_path)
+    repo.git.add('taches.json')  # Ajoute le fichier taches.json à l'index
+    repo.git.commit('-m', 'Mise à jour des tâches')  # Commit des modifications
+    repo.git.push()  # Effectue le push vers GitHub
+    st.success("Les tâches ont été envoyées sur GitHub!")
+
 # 📌 Formulaire pour ajouter une tâche
 st.subheader("➕ Ajouter une tâche")
 nom = st.text_input("Nom de la tâche :")
@@ -38,6 +51,10 @@ importance = st.slider("Niveau d'importance", 1, 5, 3, key="importance_add")
 # 📌 Sélection des dépendances parmi les tâches existantes
 options_dependances = [t["nom"] for t in st.session_state.taches]
 dependances = st.multiselect("Tâches dont cette tâche dépend :", options_dependances, key="dependances_add")
+
+# 📌 Vérification des dépendances
+if any(dep not in options_dependances for dep in dependances):
+    st.error("Une ou plusieurs dépendances n'existent pas dans les tâches actuelles.")
 
 if st.button("Ajouter la tâche"):
     if nom:
@@ -79,6 +96,10 @@ if tache_a_modifier:
     nouvelle_urgence = st.slider("Niveau d'urgence", 1, 5, tache_modifiee["urgence"], key="urgence_modify")
     nouvelle_importance = st.slider("Niveau d'importance", 1, 5, tache_modifiee["importance"], key="importance_modify")
     nouvelles_dependances = st.multiselect("Tâches dont cette tâche dépend", options_dependances, default=tache_modifiee["dependances"], key="dependances_modify")
+
+    # Vérification des dépendances lors de la modification
+    if any(dep not in options_dependances for dep in nouvelles_dependances):
+        st.error("Une ou plusieurs dépendances n'existent pas dans les tâches actuelles.")
 
     if st.button("Modifier la tâche"):
         if nouveau_nom:
