@@ -38,73 +38,68 @@ def charger_projets():
     else:
         st.warning("Aucun fichier projets.json trouvé ou il est vide.")
 
-# 📌 Charger les projets sauvegardés
-if st.button("Charger les projets sauvegardés"):
-    charger_projets()
+# 📌 Menu Parent pour choisir et gérer les projets
+st.sidebar.title("Menu Principal")
+menu_principal = st.sidebar.selectbox("Sélectionner une option", ["Projets", "Gestion des tâches"])
 
-# 📌 Menu pour choisir ou créer un projet
-st.subheader("📂 Choisir ou créer un projet")
+if menu_principal == "Projets":
+    st.subheader("📂 Choisir ou créer un projet")
 
-# Liste des projets existants
-projets_existants = list(st.session_state.projets.keys())
+    # Liste des projets existants
+    projets_existants = list(st.session_state.projets.keys())
+    projet_selectionne = st.selectbox("Sélectionner un projet existant", projets_existants)
 
-# Sélectionner un projet existant ou créer un nouveau projet
-projet_selectionne = st.selectbox("Sélectionner un projet existant", projets_existants)
-
-# Création d'un nouveau projet
-nouveau_projet = st.text_input("Nom du nouveau projet")
-if st.button("Créer un nouveau projet") and nouveau_projet:
-    if nouveau_projet not in st.session_state.projets:
-        st.session_state.projets[nouveau_projet] = []
-        sauvegarder_projets()
-        st.success(f"Projet '{nouveau_projet}' créé!")
-    else:
-        st.warning(f"Le projet '{nouveau_projet}' existe déjà!")
-
-# 📌 Modifications et suppression du projet
-if projet_selectionne:
-    st.subheader(f"Gestion du projet: {projet_selectionne}")
-    
-    # Modification du nom du projet
-    nouveau_nom_projet = st.text_input("Nouveau nom pour ce projet", value=projet_selectionne)
-    if st.button("Modifier le nom du projet"):
-        if nouveau_nom_projet and nouveau_nom_projet != projet_selectionne:
-            st.session_state.projets[nouveau_nom_projet] = st.session_state.projets.pop(projet_selectionne)
+    # Création d'un nouveau projet
+    nouveau_projet = st.text_input("Nom du nouveau projet")
+    if st.button("Créer un nouveau projet") and nouveau_projet:
+        if nouveau_projet not in st.session_state.projets:
+            st.session_state.projets[nouveau_projet] = []
             sauvegarder_projets()
-            st.success(f"Nom du projet changé en '{nouveau_nom_projet}'!")
+            st.success(f"Projet '{nouveau_projet}' créé!")
         else:
-            st.warning("Le nom du projet est identique ou vide.")
+            st.warning(f"Le projet '{nouveau_projet}' existe déjà!")
 
-    # Suppression du projet
-if st.button("Supprimer le projet"):
-    if st.radio("Êtes-vous sûr de vouloir supprimer ce projet ?", ["Non", "Oui"]) == "Oui":
-        # Suppression du projet de la session
-        del st.session_state.projets[projet_selectionne]
+    # Charger les projets sauvegardés
+    if st.button("Charger les projets sauvegardés"):
+        charger_projets()
+
+    # Modification du projet sélectionné
+    if projet_selectionne:
+        st.subheader(f"Modification du projet: {projet_selectionne}")
         
-        # Sauvegarder les projets après suppression
-        sauvegarder_projets()
-
-        # Message de succès
-        st.success(f"Projet '{projet_selectionne}' supprimé !")
+        # Modification du nom du projet
+        nouveau_nom_projet = st.text_input("Modifier le nom du projet", projet_selectionne)
+        if st.button("Modifier le nom du projet"):
+            if nouveau_nom_projet and nouveau_nom_projet != projet_selectionne:
+                st.session_state.projets[nouveau_nom_projet] = st.session_state.projets.pop(projet_selectionne)
+                sauvegarder_projets()
+                st.success(f"Nom du projet modifié en '{nouveau_nom_projet}'!")
         
-        # Recharger la liste des projets après suppression pour rafraîchir l'affichage
-        st.session_state.projets = {key: value for key, value in st.session_state.projets.items() if key != projet_selectionne}
+        # Suppression du projet
+        if st.button("Supprimer le projet"):
+            if st.radio("Êtes-vous sûr de vouloir supprimer ce projet ?", ["Non", "Oui"]) == "Oui":
+                del st.session_state.projets[projet_selectionne]
+                sauvegarder_projets()
+                st.success(f"Projet '{projet_selectionne}' supprimé!")
+                projet_selectionne = None  # Désélectionner le projet supprimé
+                # Recharger les projets après suppression
+                charger_projets()
 
-        # Recharger les projets depuis le fichier après suppression
-        sauvegarder_projets()
+# 📌 Gestion des tâches pour un projet sélectionné
+if menu_principal == "Gestion des tâches" and projet_selectionne:
+    st.subheader(f"Gestion du projet: {projet_selectionne}")
 
-# 📌 Initialiser les tâches du projet sélectionné
-if projet_selectionne:
+    # Initialiser les tâches du projet sélectionné
     if projet_selectionne not in st.session_state.projets:
         st.session_state.projets[projet_selectionne] = []
 
-    # 📌 Formulaire pour ajouter une tâche
+    # Formulaire pour ajouter une tâche
     st.subheader("➕ Ajouter une tâche")
     nom = st.text_input("Nom de la tâche :")
     urgence = st.slider("Niveau d'urgence", 1, 5, 3, key="urgence_add")
     importance = st.slider("Niveau d'importance", 1, 5, 3, key="importance_add")
 
-    # 📌 Sélection des dépendances parmi les tâches existantes
+    # Sélection des dépendances parmi les tâches existantes
     options_dependances = [t["nom"] for t in st.session_state.projets[projet_selectionne]]
     dependances = st.multiselect("Tâches dont cette tâche dépend :", options_dependances, key="dependances_add")
 
@@ -122,7 +117,7 @@ if projet_selectionne:
         else:
             st.error("Le nom de la tâche est requis.")
 
-    # 📌 Suppression d'une tâche
+    # Suppression d'une tâche
     st.subheader("🗑️ Supprimer une tâche")
     taches_a_supprimer = [t["nom"] for t in st.session_state.projets[projet_selectionne]]
     tache_a_supprimer = st.selectbox("Sélectionner une tâche à supprimer", taches_a_supprimer)
@@ -135,13 +130,15 @@ if projet_selectionne:
         else:
             st.error("Aucune tâche sélectionnée.")
 
-    # 📌 Modification d'une tâche
+    # Modification d'une tâche
     st.subheader("✏️ Modifier une tâche")
     tache_a_modifier = st.selectbox("Sélectionner une tâche à modifier", taches_a_supprimer)
 
     if tache_a_modifier:
+        # Récupérer la tâche à modifier
         tache_modifiee = next(t for t in st.session_state.projets[projet_selectionne] if t["nom"] == tache_a_modifier)
 
+        # Champs pour modifier les détails de la tâche
         nouveau_nom = st.text_input("Nom de la tâche", value=tache_modifiee["nom"], key="nom_modify")
         nouvelle_urgence = st.slider("Niveau d'urgence", 1, 5, tache_modifiee["urgence"], key="urgence_modify")
         nouvelle_importance = st.slider("Niveau d'importance", 1, 5, tache_modifiee["importance"], key="importance_modify")
@@ -204,32 +201,19 @@ if projet_selectionne:
     matrice = classifier_taches_eisenhower(st.session_state.projets[projet_selectionne])
     afficher_matrice(matrice)
     
-    # 📌 Plan d'action priorisé
-    def prioriser_taches(taches):
-        """Trie les tâches en prenant en compte l'urgence, l'importance et les dépendances."""
-        
-        def score(tache):
-            """Calcul du score basé sur l'urgence et l'importance"""
-            return tache['urgence'] * 2 + tache['importance']  # Poids plus important à l'urgence
+    # 📌 Plan d'action
+    def generer_plan_action(matrice):
+        plan = []
+        for categorie, taches_liste in matrice.items():
+            if categorie == "Important & Urgent":
+                plan.append(f"Prioriser les tâches dans '{categorie}'")
+            elif categorie == "Important mais Pas Urgent":
+                plan.append(f"Planifier les tâches dans '{categorie}'")
+            else:
+                plan.append(f"Éviter les tâches dans '{categorie}'")
+        return plan
 
-        # Trie les tâches par score
-        taches_triees = sorted(taches, key=score, reverse=True)
+    plan_action = generer_plan_action(matrice)
+    st.subheader("Plan d'Action")
+    st.write("\n".join(plan_action))
 
-        # Ordonnancement des tâches en fonction des dépendances
-        ordonnees = []
-        while taches_triees:
-            for tache in taches_triees:
-                if all(dep in [t["nom"] for t in ordonnees] for dep in tache['dependances']):
-                    ordonnees.append(tache)
-                    taches_triees.remove(tache)
-                    break
-
-        return ordonnees
-
-    # 📌 Affichage du plan d'action priorisé
-    st.subheader("📋 Plan d'Action Priorisé")
-    taches_ordonnee = prioriser_taches(st.session_state.projets[projet_selectionne])
-
-    for i, tache in enumerate(taches_ordonnee, 1):
-        dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
-        st.write(f"{i}. {tache['nom']} (Urgence: {tache['urgence']}, Importance: {tache['importance']}){dependances_str}")
