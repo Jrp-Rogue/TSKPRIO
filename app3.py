@@ -13,10 +13,8 @@ if "projets" not in st.session_state:
 
 # 📌 Fichiers JSON pour la sauvegarde
 FICHIER_PROJETS = "projets.json"
-
-# 📌 Fonction pour sauvegarder les projets dans un fichier JSON
-def sauvegarder_projets():
 import subprocess
+# 📌 Fonction pour sauvegarder les projets dans un fichier JSON
 
 def sauvegarder_projets():
     """Sauvegarde les projets dans un fichier JSON et pousse sur GitHub"""
