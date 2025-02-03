@@ -16,9 +16,18 @@ FICHIER_PROJETS = "projets.json"
 
 # 📌 Fonction pour sauvegarder les projets dans un fichier JSON
 def sauvegarder_projets():
-    with open(FICHIER_PROJETS, "w") as f:
+import subprocess
+
+def sauvegarder_projets():
+    """Sauvegarde les projets dans un fichier JSON et pousse sur GitHub"""
+    with open("projets.json", "w") as f:
         json.dump(st.session_state.projets, f)
-    st.success("Projets sauvegardés dans projets.json!")
+    
+    st.success("Projets sauvegardés !")
+
+    # Appel du script de push GitHub
+    subprocess.run(["python", "auto_push.py"], check=True)
+
 
 # 📌 Fonction pour charger les projets depuis un fichier JSON
 def charger_projets():
