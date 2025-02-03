@@ -38,53 +38,63 @@ def charger_projets():
     else:
         st.warning("Aucun fichier projets.json trouvé ou il est vide.")
 
-# 📌 Charger les projets sauvegardés
-if st.button("Charger les projets sauvegardés"):
-    charger_projets()
+# 📌 Menu parent
+menu_principal = st.sidebar.selectbox(
+    "Menu Principal", 
+    ["Gestion des Projets", "Gestion des Tâches"]
+)
 
-# 📌 Menu pour choisir ou créer un projet
-st.subheader("📂 Choisir ou créer un projet")
+# 📌 Gestion des Projets (Création, Modification, Suppression, Sélection)
+if menu_principal == "Gestion des Projets":
+    st.subheader("📂 Gestion des Projets")
 
-# Liste des projets existants
-projets_existants = list(st.session_state.projets.keys())
+    # Charger les projets existants si le bouton est cliqué
+    if st.button("Charger les projets sauvegardés"):
+        charger_projets()
 
-# Sélectionner un projet existant ou créer un nouveau projet
-projet_selectionne = st.selectbox("Sélectionner un projet existant", projets_existants)
+    # Liste des projets existants
+    projets_existants = list(st.session_state.projets.keys())
 
-# Création d'un nouveau projet
-nouveau_projet = st.text_input("Nom du nouveau projet")
-if st.button("Créer un nouveau projet") and nouveau_projet:
-    if nouveau_projet not in st.session_state.projets:
-        st.session_state.projets[nouveau_projet] = []
-        sauvegarder_projets()
-        st.success(f"Projet '{nouveau_projet}' créé!")
-    else:
-        st.warning(f"Le projet '{nouveau_projet}' existe déjà!")
+    # Sélectionner un projet existant ou créer un nouveau projet
+    projet_selectionne = st.selectbox("Sélectionner un projet existant", projets_existants)
 
-# 📌 Modifications et suppression du projet
-if projet_selectionne:
-    st.subheader(f"Gestion du projet: {projet_selectionne}")
-    
-    # Modification du nom du projet
-    nouveau_nom_projet = st.text_input("Nouveau nom pour ce projet", value=projet_selectionne)
-    if st.button("Modifier le nom du projet"):
-        if nouveau_nom_projet and nouveau_nom_projet != projet_selectionne:
-            st.session_state.projets[nouveau_nom_projet] = st.session_state.projets.pop(projet_selectionne)
+    # Création d'un nouveau projet
+    nouveau_projet = st.text_input("Nom du nouveau projet")
+    if st.button("Créer un nouveau projet") and nouveau_projet:
+        if nouveau_projet not in st.session_state.projets:
+            st.session_state.projets[nouveau_projet] = []
             sauvegarder_projets()
-            st.success(f"Nom du projet changé en '{nouveau_nom_projet}'!")
+            st.success(f"Projet '{nouveau_projet}' créé!")
         else:
-            st.warning("Le nom du projet est identique ou vide.")
+            st.warning(f"Le projet '{nouveau_projet}' existe déjà!")
 
-    # Suppression du projet
-    if st.button("Supprimer le projet"):
-        if st.confirm("Êtes-vous sûr de vouloir supprimer ce projet ?"):
-            del st.session_state.projets[projet_selectionne]
-            sauvegarder_projets()
-            st.success(f"Projet '{projet_selectionne}' supprimé !")
-            projet_selectionne = None  # Deselect project
+    # Modifications et suppression du projet sélectionné
+    if projet_selectionne:
+        st.subheader(f"Gestion du projet: {projet_selectionne}")
+        
+        # Modification du nom du projet
+        nouveau_nom_projet = st.text_input("Nouveau nom pour ce projet", value=projet_selectionne)
+        if st.button("Modifier le nom du projet"):
+            if nouveau_nom_projet and nouveau_nom_projet != projet_selectionne:
+                st.session_state.projets[nouveau_nom_projet] = st.session_state.projets.pop(projet_selectionne)
+                sauvegarder_projets()
+                st.success(f"Nom du projet changé en '{nouveau_nom_projet}'!")
+            else:
+                st.warning("Le nom du projet est identique ou vide.")
 
-# 📌 Initialiser les tâches du projet sélectionné
-if projet_selectionne:
+        # Suppression du projet
+        if st.button("Supprimer le projet"):
+            if st.confirm("Êtes-vous sûr de vouloir supprimer ce projet ?"):
+                del st.session_state.projets[projet_selectionne]
+                sauvegarder_projets()
+                st.success(f"Projet '{projet_selectionne}' supprimé !")
+                projet_selectionne = None  # Deselect project
+
+# 📌 Gestion des Tâches (Ajout, Suppression, Modification, Matrice d'Eisenhower, Plan d'Action)
+if menu_principal == "Gestion des Tâches" and projet_selectionne:
+    st.subheader(f"📝 Gestion des Tâches pour le projet: {projet_selectionne}")
+    
+    # 📌 Initialiser les tâches du projet sélectionné
     if projet_selectionne not in st.session_state.projets:
         st.session_state.projets[projet_selectionne] = []
 
