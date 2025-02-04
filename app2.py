@@ -30,7 +30,6 @@ st.title("📌 Gestionnaire de Tâches")
 if "taches" not in st.session_state:
     st.session_state.taches = charger_taches()
 
-
 # 📌 Menu de navigation
 menu = ["Dashboard", "Ajouter une tâche", "Modifier ou supprimer une tâche", "Matrice d'Eisenhower", "Plan d'Action"]
 choix = st.sidebar.selectbox("Sélectionner une option", menu)
@@ -114,72 +113,71 @@ def classifier_taches_eisenhower(taches):
             matrice['Pas Important & Pas Urgent'].append(tache)
     return matrice
 
+def afficher_matrice(matrice):
+    fig, ax = plt.subplots(figsize=(10, 10))
+    ax.set_xlim(0, 2)
+    ax.set_ylim(0, 2)
+    ax.axhline(y=1, color='black', linewidth=2)
+    ax.axvline(x=1, color='black', linewidth=2)
+    colors = {'Important & Urgent': 'red', 'Important mais Pas Urgent': 'orange', 'Pas Important mais Urgent': 'blue', 'Pas Important & Pas Urgent': 'gray'}
     
-    def afficher_matrice(matrice):
-        fig, ax = plt.subplots(figsize=(10, 10))
-        ax.set_xlim(0, 2)
-        ax.set_ylim(0, 2)
-        ax.axhline(y=1, color='black', linewidth=2)
-        ax.axvline(x=1, color='black', linewidth=2)
-        colors = {'Important & Urgent': 'red', 'Important mais Pas Urgent': 'orange', 'Pas Important mais Urgent': 'blue', 'Pas Important & Pas Urgent': 'gray'}
-        
-        for categorie, taches_liste in matrice.items():
-            x, y = (0, 1) if categorie == 'Important & Urgent' else (1, 1) if categorie == 'Important mais Pas Urgent' else (0, 0) if categorie == 'Pas Important mais Urgent' else (1, 0)
-            ax.add_patch(plt.Rectangle((x, y), 1, 1, color=colors[categorie], alpha=0.3))
-            ax.text(x + 0.5, y + 1.05, categorie, ha='center', va='center', fontsize=12, fontweight='bold', color='black')
-            for i, tache in enumerate(taches_liste):
-                ax.text(x + 0.5, y + 1.05 - (i + 1) * 0.15, tache["nom"], ha='center', va='center', fontsize=10, color='black')
-        ax.set_xticks([0.5, 1.5])
-        ax.set_yticks([0.5, 1.5])
-        ax.axis('off')
-        st.pyplot(fig)
+    for categorie, taches_liste in matrice.items():
+        x, y = (0, 1) if categorie == 'Important & Urgent' else (1, 1) if categorie == 'Important mais Pas Urgent' else (0, 0) if categorie == 'Pas Important mais Urgent' else (1, 0)
+        ax.add_patch(plt.Rectangle((x, y), 1, 1, color=colors[categorie], alpha=0.3))
+        ax.text(x + 0.5, y + 1.05, categorie, ha='center', va='center', fontsize=12, fontweight='bold', color='black')
+        for i, tache in enumerate(taches_liste):
+            ax.text(x + 0.5, y + 1.05 - (i + 1) * 0.15, tache["nom"], ha='center', va='center', fontsize=10, color='black')
+    ax.set_xticks([0.5, 1.5])
+    ax.set_yticks([0.5, 1.5])
+    ax.axis('off')
+    st.pyplot(fig)
 
-    matrice = classifier_taches_eisenhower(st.session_state.taches)
-    afficher_matrice(matrice)
+matrice = classifier_taches_eisenhower(st.session_state.taches)
+afficher_matrice(matrice)
 
 # 📌 Plan d'action
 elif choix == "Plan d'Action":
-st.subheader("📌 Plan d'Action")
+    st.subheader("📌 Plan d'Action")
 
-def prioriser_taches(taches, matrice):
-    """Trie les tâches en prenant en compte la dépendance, la priorité et la matrice d'Eisenhower."""
-    taches_par_nom = {t['nom']: t for t in taches}
-    
-    # Fonction pour obtenir le score d'une tâche basé sur la matrice
-    def score(tache, visited=None):
-        if visited is None:
-            visited = set()
-        if tache['nom'] in visited:
-            return float('-inf')  # Évite les boucles infinies
-        visited.add(tache['nom'])
+    def prioriser_taches(taches, matrice):
+        """Trie les tâches en prenant en compte la dépendance, la priorité et la matrice d'Eisenhower."""
+        taches_par_nom = {t['nom']: t for t in taches}
+        
+        # Fonction pour obtenir le score d'une tâche basé sur la matrice
+        def score(tache, visited=None):
+            if visited is None:
+                visited = set()
+            if tache['nom'] in visited:
+                return float('-inf')  # Évite les boucles infinies
+            visited.add(tache['nom'])
 
-        # Score basé sur la matrice d'Eisenhower
-        if tache in matrice['Important & Urgent']:
-            base_score = 4
-        elif tache in matrice['Important mais Pas Urgent']:
-            base_score = 3
-        elif tache in matrice['Pas Important mais Urgent']:
-            base_score = 2
-        else:
-            base_score = 1
+            # Score basé sur la matrice d'Eisenhower
+            if tache in matrice['Important & Urgent']:
+                base_score = 4
+            elif tache in matrice['Important mais Pas Urgent']:
+                base_score = 3
+            elif tache in matrice['Pas Important mais Urgent']:
+                base_score = 2
+            else:
+                base_score = 1
 
-        # Ajustement du score en fonction des dépendances
-        if tache['dependances']:
-            # Si une tâche dépend d'une autre, on la place après la tâche dont elle dépend
-            return min(score(taches_par_nom[d], visited) for d in tache['dependances']) - 1
-        return base_score
+            # Ajustement du score en fonction des dépendances
+            if tache['dependances']:
+                # Si une tâche dépend d'une autre, on la place après la tâche dont elle dépend
+                return min(score(taches_par_nom[d], visited) for d in tache['dependances']) - 1
+            return base_score
 
-    return sorted(taches, key=score, reverse=True)
+        return sorted(taches, key=score, reverse=True)
 
-# 📊 Génération de la matrice d'Eisenhower
-matrice = classifier_taches_eisenhower(st.session_state.taches)
+    # 📊 Génération de la matrice d'Eisenhower
+    matrice = classifier_taches_eisenhower(st.session_state.taches)
 
-# 📋 Priorisation des tâches en fonction de la matrice d'Eisenhower et des dépendances
-taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
+    # 📋 Priorisation des tâches en fonction de la matrice d'Eisenhower et des dépendances
+    taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
 
-st.subheader("📌 Plan d'Action Priorisé")
+    st.subheader("📌 Plan d'Action Priorisé")
 
-# Affichage des tâches priorisées avec numérotation
-for i, tache in enumerate(taches_ordonnee, 1):
-    dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
-    st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
+    # Affichage des tâches priorisées avec numérotation
+    for i, tache in enumerate(taches_ordonnee, 1):
+        dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
+        st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
