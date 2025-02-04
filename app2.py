@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import os
+import pandas as pd
 
 # 📌 Nom du fichier pour stocker les tâches
 FILE_NAME = "taches.json"
