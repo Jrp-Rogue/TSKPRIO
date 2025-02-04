@@ -5,12 +5,6 @@ import numpy as np
 import base64
 import requests
 
-# Remplir avec ton token GitHub et les informations de ton dépôt
-GITHUB_TOKEN = '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'
-REPO_OWNER = 'Jrp-Rogue'
-REPO_NAME = 'TSKPRIO'
-FILE_PATH = 'taches.json'
-BRANCH = 'main'
 
 # 📌 Titre de l'application
 st.title("📌 Gestionnaire de Tâches")
@@ -26,37 +20,7 @@ def sauvegarder_taches():
     st.success("Tâches sauvegardées dans taches.json!")
     push_to_github()  # Push vers GitHub après chaque sauvegarde
 # Fonction pour pousser les changements vers GitHub
-def push_to_github():
-    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FILE_PATH}'
-    headers = {
-        'Authorization': f'token {GITHUB_TOKEN}',
-        'Accept': 'application/vnd.github.v3+json',
-    }
 
-    taches_json = json.dumps(st.session_state.taches, indent=4)
-    content_base64 = base64.b64encode(taches_json.encode('utf-8')).decode('utf-8')
-
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        file_info = response.json()
-        sha = file_info['sha']
-
-        update_url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FILE_PATH}'
-        data = {
-            'message': 'Mise à jour des tâches',
-            'content': content_base64,
-            'sha': sha,
-            'branch': BRANCH,
-        }
-
-        update_response = requests.put(update_url, headers=headers, json=data)
-
-        if update_response.status_code == 200:
-            st.success('Le fichier taches.json a été mis à jour sur GitHub avec succès !')
-        else:
-            st.error(f"Erreur lors de la mise à jour : {update_response.status_code} - {update_response.text}")
-    else:
-        st.error(f"Erreur lors de la récupération du fichier : {response.status_code} - {response.text}")
         
 # 📌 Fonction pour charger les tâches depuis un fichier JSON
 def charger_taches():
