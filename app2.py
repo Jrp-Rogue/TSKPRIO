@@ -145,11 +145,7 @@ elif choix == "Plan d'Action":
 
     st.subheader("📌 Plan d'Action")
 
-    def prioriser_taches(taches, matrice):
-        """Trie les tâches en prenant en compte la dépendance, la priorité et la matrice d'Eisenhower."""
-        taches_par_nom = {t['nom']: t for t in taches}
-        
-        def classifier_taches_eisenhower(taches):
+    def classifier_taches_eisenhower(taches):
         """Classe les tâches selon la matrice d'Eisenhower"""
         matrice = {
             'Important & Urgent': [],
@@ -167,6 +163,10 @@ elif choix == "Plan d'Action":
             else:
                 matrice['Pas Important & Pas Urgent'].append(tache)
         return matrice
+
+    def prioriser_taches(taches, matrice):
+        """Trie les tâches en prenant en compte la dépendance, la priorité et la matrice d'Eisenhower."""
+        taches_par_nom = {t['nom']: t for t in taches}
 
         # Fonction pour obtenir le score d'une tâche basé sur la matrice
         def score(tache, visited=None):
