@@ -24,6 +24,25 @@ def sauvegarder_taches():
     with open(FILE_NAME, "w") as f:
         json.dump(st.session_state.taches, f)
 
+# 📌 Nom du fichier pour stocker la planification
+PLANIF_FILE = "planification.json"
+
+# 📌 Fonction pour charger la planification depuis le fichier JSON
+def charger_planification():
+    if os.path.exists(PLANIF_FILE):
+        with open(PLANIF_FILE, "r") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                st.error("Erreur de format JSON dans la planification.")
+                return {jour: [] for jour in ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]}
+    return {jour: [] for jour in ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]}
+
+# 📌 Fonction pour sauvegarder la planification dans le fichier JSON
+def sauvegarder_planification():
+    with open(PLANIF_FILE, "w") as f:
+        json.dump(st.session_state.planification, f)
+
 # 📌 Titre de l'application
 st.title("📌 Gestionnaire de Tâches")
 
@@ -238,7 +257,8 @@ elif choix == "Planification Hebdomadaire":
 
     # Initialisation de l'état si non existant
     if "planification" not in st.session_state:
-        st.session_state.planification = {jour: [] for jour in jours_semaine}
+        st.session_state.planification = charger_planification()
+
 
     # Interface pour assigner les tâches aux jours
     for jour in jours_semaine:
@@ -249,6 +269,7 @@ elif choix == "Planification Hebdomadaire":
             key=f"planif_{jour}"
         )
         st.session_state.planification[jour] = taches_selectionnees  # Mise à jour
+        sauvegarder_planification()  # 📌 Sauvegarde automatique après modification
 
     # 📌 Affichage de la planification sous forme de tableau
     st.subheader("🗓️ Vue hebdomadaire")
