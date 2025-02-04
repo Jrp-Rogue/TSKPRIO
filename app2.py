@@ -5,9 +5,6 @@ import pandas as pd
 
 # 📌 Nom du fichier pour stocker les tâches
 FILE_NAME = "taches.json"
-FICHIER_PLANIFICATION = "planification.json"
-
-
 
 # 📌 Fonction pour charger les tâches depuis le fichier JSON
 def charger_taches():
@@ -239,27 +236,9 @@ elif choix == "Planification Hebdomadaire":
 
     jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
-    # 📌 Fonction pour charger la planification depuis le fichier JSON
-def charger_planification():
-    if os.path.exists(FICHIER_PLANIFICATION):
-        with open(FICHIER_PLANIFICATION, "r") as f:
-            try:
-                # Tente de charger le contenu JSON
-                return json.load(f)
-            except json.JSONDecodeError:
-                # Si le fichier est corrompu ou vide, retourne une liste vide
-                st.error("Erreur de format JSON, le fichier est peut-être corrompu ou vide.")
-                return []
-    return []
-
-# 📌 Fonction pour sauvegarder les tâches dans le fichier JSON
-def sauvegarder_planification():
-    with open(FICHIER_PLANIFICATION, "w") as f:
-        json.dump(st.session_state.planification, f)
-
     # Initialisation de l'état si non existant
     if "planification" not in st.session_state:
-        st.session_state.planification = charger_planificaetion()
+        st.session_state.planification = {jour: [] for jour in jours_semaine}
 
     # Interface pour assigner les tâches aux jours
     for jour in jours_semaine:
@@ -284,15 +263,9 @@ def sauvegarder_planification():
     # Reformater les données pour que chaque tâche soit sur une ligne distincte
     table = {jour: (st.session_state.planification[jour] + [""] * (max_tasks - len(st.session_state.planification[jour])))
              for jour in jours_semaine}
-
-    st.session_state.planification.append
-    sauvegarder_planification()  # Sauvegarde après ajout
     
     # Création du DataFrame
     df = pd.DataFrame(table)
     
     # Affichage sous forme de tableau
     st.dataframe(df)
-
-
-
