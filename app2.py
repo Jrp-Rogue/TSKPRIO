@@ -137,7 +137,7 @@ elif choix == "Matrice d'Eisenhower":
 elif choix == "Plan d'Action":
     st.subheader("📌 Plan d'Action")
     
-    def prioriser_taches(taches):
+    def prioriser_taches(taches, matrice):
         """Trie les tâches en prenant en compte la dépendance et la priorité."""
         taches_par_nom = {t['nom']: t for t in taches}
 
@@ -166,7 +166,7 @@ elif choix == "Plan d'Action":
         return sorted(taches, key=score, reverse=True)
 
     st.subheader("📌 Plan d'Action Priorisé")
-    taches_ordonnee = prioriser_taches(st.session_state.taches)
+    taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
 
     for i, tache in enumerate(taches_ordonnee, 1):
         dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
