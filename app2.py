@@ -25,7 +25,7 @@ def sauvegarder_taches():
         json.dump(st.session_state.taches, f)
 
 # 📌 Nom du fichier pour stocker la planification
-PLANIF_FILE = "planification.json"
+PLANIF_FILE = "planifications.json"
 
 # 📌 Fonction pour charger la planification depuis le fichier JSON
 def charger_planification():
@@ -41,7 +41,7 @@ def charger_planification():
 # 📌 Fonction pour sauvegarder la planification dans le fichier JSON
 def sauvegarder_planification():
     with open(PLANIF_FILE, "w") as f:
-        json.dump(st.session_state.planification, f)
+        json.dump(st.session_state.planifications, f)
 
 # 📌 Titre de l'application
 st.title("📌 Gestionnaire de Tâches")
@@ -257,7 +257,7 @@ elif choix == "Planification Hebdomadaire":
 
     # Initialisation de l'état si non existant
     if "planification" not in st.session_state:
-        st.session_state.planification = charger_planification()
+        st.session_state.planifications = charger_planification()
 
 
     # Interface pour assigner les tâches aux jours
@@ -265,10 +265,10 @@ elif choix == "Planification Hebdomadaire":
         taches_selectionnees = st.multiselect(
             f"Tâches pour {jour}",
             options=[t["nom"] for t in st.session_state.taches],  # Liste des tâches
-            default=st.session_state.planification[jour],  # Valeurs actuelles
+            default=st.session_state.planifications[jour],  # Valeurs actuelles
             key=f"planif_{jour}"
         )
-        st.session_state.planification[jour] = taches_selectionnees  # Mise à jour
+        st.session_state.planifications[jour] = taches_selectionnees  # Mise à jour
         sauvegarder_planification()  # 📌 Sauvegarde automatique après modification
 
     # 📌 Affichage de la planification sous forme de tableau
@@ -276,13 +276,13 @@ elif choix == "Planification Hebdomadaire":
     
     # Vérifie que `st.session_state.planification` existe
     if "planification" not in st.session_state:
-        st.session_state.planification = {jour: [] for jour in jours_semaine}
+        st.session_state.planifications = {jour: [] for jour in jours_semaine}
     
     # Trouver le nombre maximum de tâches pour définir le nombre de lignes du tableau
-    max_tasks = max(len(taches) for taches in st.session_state.planification.values())
+    max_tasks = max(len(taches) for taches in st.session_state.planifications.values())
     
     # Reformater les données pour que chaque tâche soit sur une ligne distincte
-    table = {jour: (st.session_state.planification[jour] + [""] * (max_tasks - len(st.session_state.planification[jour])))
+    table = {jour: (st.session_state.planifications[jour] + [""] * (max_tasks - len(st.session_state.planifications[jour])))
              for jour in jours_semaine}
     
     # Création du DataFrame
