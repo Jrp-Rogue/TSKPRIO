@@ -133,12 +133,11 @@ elif choix == "Matrice d'Eisenhower":
         ax.set_yticks([0.5, 1.5])
         ax.axis('off')
         st.pyplot(fig)
-   
-        if "taches" in st.session_state and len(st.session_state.taches) > 0:
+    if "taches" in st.session_state and len(st.session_state.taches) > 0:
         matrice = classifier_taches_eisenhower(st.session_state.taches)
         else:
         st.error("Aucune tâche disponible pour classer.")
-    elif afficher_matrice(matrice)
+        elif afficher_matrice(matrice)
 
 # 📌 Plan d'action
 elif choix == "Plan d'Action":
