@@ -138,6 +138,7 @@ afficher_matrice(matrice)
 
 # 📌 Plan d'action
 elif choix == "Plan d'Action":
+
     st.subheader("📌 Plan d'Action")
 
     def prioriser_taches(taches, matrice):
