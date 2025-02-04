@@ -6,7 +6,20 @@ import pandas as pd
 # 📌 Nom du fichier pour stocker les tâches
 FILE_NAME = "taches.json"
 
-PLANIFICATION_FILE = "planification.json"
+FICHIER_PLANIFICATION = "planification.json"
+
+def sauvegarder_planification():
+    """Sauvegarde la planification dans un fichier JSON."""
+    with open(FICHIER_PLANIFICATION, "w", encoding="utf-8") as f:
+        json.dump(st.session_state.planification, f)
+
+def charger_planification():
+    """Charge la planification depuis un fichier JSON."""
+    if os.path.exists(FICHIER_PLANIFICATION):
+        with open(FICHIER_PLANIFICATION, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {jour: [] for jour in jours_semaine}
+
 
 # 📌 Fonction pour charger les tâches depuis le fichier JSON
 def charger_taches():
@@ -238,7 +251,7 @@ elif choix == "Planification Hebdomadaire":
 
     jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
-    # Charger la planification si elle n'est pas encore dans `st.session_state`
+    # Charger la planification si elle existe
     if "planification" not in st.session_state:
         st.session_state.planification = charger_planification()
 
@@ -251,22 +264,23 @@ elif choix == "Planification Hebdomadaire":
             key=f"planif_{jour}"
         )
         st.session_state.planification[jour] = taches_selectionnees  # Mise à jour
-    
-    # Sauvegarde automatique dès qu'un changement est détecté
+
+    # Sauvegarde automatique après sélection
     sauvegarder_planification()
 
     # 📌 Affichage de la planification sous forme de tableau
     st.subheader("🗓️ Vue hebdomadaire")
-    
+
     # Trouver le nombre maximum de tâches pour définir le nombre de lignes du tableau
     max_tasks = max(len(taches) for taches in st.session_state.planification.values())
-    
+
     # Reformater les données pour que chaque tâche soit sur une ligne distincte
     table = {jour: (st.session_state.planification[jour] + [""] * (max_tasks - len(st.session_state.planification[jour])))
              for jour in jours_semaine}
-    
+
     # Création du DataFrame
     df = pd.DataFrame(table)
-    
+
     # Affichage sous forme de tableau
     st.dataframe(df)
+
