@@ -256,9 +256,8 @@ elif choix == "Planification Hebdomadaire":
     jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
     # Initialisation de l'état si non existant
-    if "planification" not in st.session_state:
+    if "planifications" not in st.session_state:
         st.session_state.planifications = charger_planification()
-
 
     # Interface pour assigner les tâches aux jours
     for jour in jours_semaine:
@@ -280,13 +279,12 @@ elif choix == "Planification Hebdomadaire":
         # Mise à jour de la planification
         st.session_state.planifications[jour] = taches_selectionnees
         sauvegarder_planification()  # Sauvegarde après modification
-    
 
     # 📌 Affichage de la planification sous forme de tableau
     st.subheader("🗓️ Vue hebdomadaire")
     
-    # Vérifie que `st.session_state.planification` existe
-    if "planification" not in st.session_state:
+    # Vérifie que `st.session_state.planifications` existe
+    if "planifications" not in st.session_state:
         st.session_state.planifications = {jour: [] for jour in jours_semaine}
     
     # Trouver le nombre maximum de tâches pour définir le nombre de lignes du tableau
@@ -301,3 +299,4 @@ elif choix == "Planification Hebdomadaire":
     
     # Affichage sous forme de tableau
     st.dataframe(df)
+
