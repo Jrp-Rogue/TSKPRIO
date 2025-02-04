@@ -1,5 +1,4 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 import json
 import os
 
@@ -10,7 +9,13 @@ FILE_NAME = "taches.json"
 def charger_taches():
     if os.path.exists(FILE_NAME):
         with open(FILE_NAME, "r") as f:
-            return json.load(f)
+            try:
+                # Tente de charger le contenu JSON
+                return json.load(f)
+            except json.JSONDecodeError:
+                # Si le fichier est corrompu ou vide, retourne une liste vide
+                st.error("Erreur de format JSON, le fichier est peut-être corrompu ou vide.")
+                return []
     return []
 
 # 📌 Fonction pour sauvegarder les tâches dans le fichier JSON
@@ -24,6 +29,7 @@ st.title("📌 Gestionnaire de Tâches")
 # 📌 Chargement des tâches depuis le fichier JSON (si elles existent)
 if "taches" not in st.session_state:
     st.session_state.taches = charger_taches()
+
 
 # 📌 Menu de navigation
 menu = ["Dashboard", "Ajouter une tâche", "Modifier ou supprimer une tâche", "Matrice d'Eisenhower", "Plan d'Action"]
@@ -165,7 +171,7 @@ elif choix == "Plan d'Action":
 
         return sorted(taches, key=score, reverse=True)
 
-    st.subheader("📌 Plan d'Action Priorisé")
+   
     taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
 
     for i, tache in enumerate(taches_ordonnee, 1):
