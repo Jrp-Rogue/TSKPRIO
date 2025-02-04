@@ -95,27 +95,25 @@ elif choix == "Modifier ou supprimer une tâche":
             st.success(f"Tâche '{tache_selectionnee}' supprimée !")
 
 # 📌 Matrice d'Eisenhower
-elif choix == "Matrice d'Eisenhower":
-    st.subheader("📊 Matrice d'Eisenhower")
-    
-    def classifier_taches_eisenhower(taches):
-        """Classe les tâches selon la matrice d'Eisenhower"""
-        matrice = {
-            'Important & Urgent': [],
-            'Important mais Pas Urgent': [],
-            'Pas Important mais Urgent': [],
-            'Pas Important & Pas Urgent': []
-        }
-        for tache in taches:
-            if tache['importance'] >= 3 and tache['urgence'] >= 3:
-                matrice['Important & Urgent'].append(tache)
-            elif tache['importance'] >= 3 and tache['urgence'] < 3:
-                matrice['Important mais Pas Urgent'].append(tache)
-            elif tache['importance'] < 3 and tache['urgence'] >= 3:
-                matrice['Pas Important mais Urgent'].append(tache)
-            else:
-                matrice['Pas Important & Pas Urgent'].append(tache)
-        return matrice
+def classifier_taches_eisenhower(taches):
+    """Classe les tâches selon la matrice d'Eisenhower"""
+    matrice = {
+        'Important & Urgent': [],
+        'Important mais Pas Urgent': [],
+        'Pas Important mais Urgent': [],
+        'Pas Important & Pas Urgent': []
+    }
+    for tache in taches:
+        if tache['importance'] >= 3 and tache['urgence'] >= 3:
+            matrice['Important & Urgent'].append(tache)
+        elif tache['importance'] >= 3 and tache['urgence'] < 3:
+            matrice['Important mais Pas Urgent'].append(tache)
+        elif tache['importance'] < 3 and tache['urgence'] >= 3:
+            matrice['Pas Important mais Urgent'].append(tache)
+        else:
+            matrice['Pas Important & Pas Urgent'].append(tache)
+    return matrice
+
     
     def afficher_matrice(matrice):
         fig, ax = plt.subplots(figsize=(10, 10))
