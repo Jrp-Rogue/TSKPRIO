@@ -114,6 +114,7 @@ def classifier_taches_eisenhower(taches):
     return matrice
 
 def afficher_matrice(matrice):
+    import matplotlib.pyplot as plt
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.set_xlim(0, 2)
     ax.set_ylim(0, 2)
@@ -142,7 +143,7 @@ elif choix == "Plan d'Action":
     def prioriser_taches(taches, matrice):
         """Trie les tâches en prenant en compte la dépendance, la priorité et la matrice d'Eisenhower."""
         taches_par_nom = {t['nom']: t for t in taches}
-        
+
         # Fonction pour obtenir le score d'une tâche basé sur la matrice
         def score(tache, visited=None):
             if visited is None:
