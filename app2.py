@@ -250,9 +250,17 @@ elif choix == "Planification Hebdomadaire":
         )
         st.session_state.planification[jour] = taches_selectionnees  # Mise à jour
 
-    # Affichage de la planification sous forme de tableau
-    st.subheader("🗓️ Vue hebdomadaire")
-    table = {jour: ", ".join(st.session_state.planification[jour]) or "Aucune tâche" for jour in jours_semaine}
 
-    st.write(pd.DataFrame(table, index=["Tâches"]))
+    # 📌 Affichage de la planification sous forme de tableau
+    st.subheader("🗓️ Vue hebdomadaire")
+    
+    # Génération du dictionnaire des tâches par jour
+    table = {jour: ", ".join(st.session_state.planification[jour]) or "Aucune tâche" for jour in jours_semaine}
+    
+    # Conversion en DataFrame
+    df = pd.DataFrame([table])
+
+# Affichage avec `st.dataframe()` pour une meilleure lisibilité
+st.dataframe(df)
+
 
