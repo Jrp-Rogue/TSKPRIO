@@ -284,6 +284,9 @@ def sauvegarder_planification():
     # Reformater les données pour que chaque tâche soit sur une ligne distincte
     table = {jour: (st.session_state.planification[jour] + [""] * (max_tasks - len(st.session_state.planification[jour])))
              for jour in jours_semaine}
+
+    st.session_state.planification.append(nouvelle_tache)
+    sauvegarder_planification()  # Sauvegarde après ajout
     
     # Création du DataFrame
     df = pd.DataFrame(table)
@@ -291,6 +294,5 @@ def sauvegarder_planification():
     # Affichage sous forme de tableau
     st.dataframe(df)
 
-    st.session_state.planification.append(nouvelle_tache)
-                sauvegarder_planification()  # Sauvegarde après ajout
+
 
