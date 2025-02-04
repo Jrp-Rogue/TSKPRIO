@@ -180,7 +180,7 @@ elif choix == "Plan d'Action":
                 return float('-inf')  # Évite les boucles infinies
             visited.add(tache['nom'])
 
-            # Score basé sur la matrice d'Eisenhower
+            # Score basé sur la matrice d'Eisenhower (urgence et importance)
             if tache in matrice['Important & Urgent']:
                 base_score = 4
             elif tache in matrice['Important mais Pas Urgent']:
@@ -192,18 +192,37 @@ elif choix == "Plan d'Action":
 
             # Ajustement du score en fonction des dépendances
             if tache['dependances']:
-                # Si une tâche dépend d'une autre, on la place après la tâche dont elle dépend
-                return min(score(taches_par_nom[d], visited) for d in tache['dependances']) - 1
+                max_dependance_score = max(score(taches_par_nom[d], visited) for d in tache['dependances'])
+                # Le score ajusté ne sera pas inférieur à la priorité de la matrice
+                base_score = max(base_score, max_dependance_score)
+
             return base_score
 
-        return sorted(taches, key=score, reverse=True)
+        # On utilise le score calculé pour trier les tâches
+        taches_triees = sorted(taches, key=score, reverse=True)
+
+        # On fait en sorte que les tâches dépendantes soient priorisées avant celles qui en dépendent
+        taches_finales = []
+        taches_deja_affichees = set()
+
+        # On place les tâches qui n'ont pas de dépendances en premier
+        for tache in taches_triees:
+            if not tache['dependances']:
+                taches_finales.append(tache)
+                taches_deja_affichees.add(tache['nom'])
+
+        # Ensuite, on place les tâches dépendantes
+        for tache in taches_triees:
+            if tache['nom'] not in taches_deja_affichees:
+                taches_finales.append(tache)
+
+        return taches_finales
 
     # 📊 Génération de la matrice d'Eisenhower
     matrice = classifier_taches_eisenhower(st.session_state.taches)
     
     # 📋 Priorisation des tâches en fonction de la matrice d'Eisenhower et des dépendances
     taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
-
 
     # Affichage des tâches priorisées avec numérotation
     for i, tache in enumerate(taches_ordonnee, 1):
