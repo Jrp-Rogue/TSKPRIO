@@ -138,48 +138,48 @@ def classifier_taches_eisenhower(taches):
     afficher_matrice(matrice)
 
 # 📌 Plan d'action
-elif choix == "Plan d'Action":
-    st.subheader("📌 Plan d'Action")
-    
-    def prioriser_taches(taches, matrice):
-        """Trie les tâches en prenant en compte la dépendance, la priorité et la matrice d'Eisenhower."""
-        taches_par_nom = {t['nom']: t for t in taches}
+    elif choix == "Plan d'Action":
+        st.subheader("📌 Plan d'Action")
         
-        # Fonction pour obtenir le score d'une tâche basé sur la matrice
-        def score(tache, visited=None):
-            if visited is None:
-                visited = set()
-            if tache['nom'] in visited:
-                return float('-inf')  # Évite les boucles infinies
-            visited.add(tache['nom'])
-
-            # Score basé sur la matrice d'Eisenhower
-            if tache in matrice['Important & Urgent']:
-                base_score = 4
-            elif tache in matrice['Important mais Pas Urgent']:
-                base_score = 3
-            elif tache in matrice['Pas Important mais Urgent']:
-                base_score = 2
-            else:
-                base_score = 1
-
-            # Ajustement du score en fonction des dépendances
-            if tache['dependances']:
-                # Si une tâche dépend d'une autre, on la place après la tâche dont elle dépend
-                return min(score(taches_par_nom[d], visited) for d in tache['dependances']) - 1
-            return base_score
-
-        return sorted(taches, key=score, reverse=True)
+        def prioriser_taches(taches, matrice):
+            """Trie les tâches en prenant en compte la dépendance, la priorité et la matrice d'Eisenhower."""
+            taches_par_nom = {t['nom']: t for t in taches}
+            
+            # Fonction pour obtenir le score d'une tâche basé sur la matrice
+            def score(tache, visited=None):
+                if visited is None:
+                    visited = set()
+                if tache['nom'] in visited:
+                    return float('-inf')  # Évite les boucles infinies
+                visited.add(tache['nom'])
     
-    # 📊 Génération de la matrice d'Eisenhower
-    matrice = classifier_taches_eisenhower(st.session_state.taches)
+                # Score basé sur la matrice d'Eisenhower
+                if tache in matrice['Important & Urgent']:
+                    base_score = 4
+                elif tache in matrice['Important mais Pas Urgent']:
+                    base_score = 3
+                elif tache in matrice['Pas Important mais Urgent']:
+                    base_score = 2
+                else:
+                    base_score = 1
     
-    # 📋 Priorisation des tâches en fonction de la matrice d'Eisenhower et des dépendances
-    taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
-
-    st.subheader("📌 Plan d'Action Priorisé")
-
-    # Affichage des tâches priorisées avec numérotation
-    for i, tache in enumerate(taches_ordonnee, 1):
-        dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
-        st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
+                # Ajustement du score en fonction des dépendances
+                if tache['dependances']:
+                    # Si une tâche dépend d'une autre, on la place après la tâche dont elle dépend
+                    return min(score(taches_par_nom[d], visited) for d in tache['dependances']) - 1
+                return base_score
+    
+            return sorted(taches, key=score, reverse=True)
+        
+        # 📊 Génération de la matrice d'Eisenhower
+        matrice = classifier_taches_eisenhower(st.session_state.taches)
+        
+        # 📋 Priorisation des tâches en fonction de la matrice d'Eisenhower et des dépendances
+        taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
+    
+        st.subheader("📌 Plan d'Action Priorisé")
+    
+        # Affichage des tâches priorisées avec numérotation
+        for i, tache in enumerate(taches_ordonnee, 1):
+            dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
+            st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
