@@ -136,37 +136,38 @@ elif choix == "Matrice d'Eisenhower":
 # 📌 Plan d'action
 elif choix == "Plan d'Action":
     st.subheader("📌 Plan d'Action")
+    
     def prioriser_taches(taches):
-    """Trie les tâches en prenant en compte la dépendance et la priorité."""
-    taches_par_nom = {t['nom']: t for t in taches}
+        """Trie les tâches en prenant en compte la dépendance et la priorité."""
+        taches_par_nom = {t['nom']: t for t in taches}
 
-    def score(tache, visited=None):
-        if visited is None:
-            visited = set()
-        if tache['nom'] in visited:
-            return float('-inf')  # Évite les boucles infinies
-        visited.add(tache['nom'])
+        def score(tache, visited=None):
+            if visited is None:
+                visited = set()
+            if tache['nom'] in visited:
+                return float('-inf')  # Évite les boucles infinies
+            visited.add(tache['nom'])
 
-        # Score basé sur la matrice d'Eisenhower
-        if tache in matrice['🔴 Important & Urgent']:
-            base_score = 4
-        elif tache in matrice['🟡 Important mais Pas Urgent']:
-            base_score = 3
-        elif tache in matrice['🔵 Pas Important mais Urgent']:
-            base_score = 2
-        else:
-            base_score = 1
+            # Score basé sur la matrice d'Eisenhower
+            if tache in matrice['Important & Urgent']:
+                base_score = 4
+            elif tache in matrice['Important mais Pas Urgent']:
+                base_score = 3
+            elif tache in matrice['Pas Important mais Urgent']:
+                base_score = 2
+            else:
+                base_score = 1
 
-        # Ajustement du score en fonction des dépendances
-        if tache['dependances']:
-            return min(score(taches_par_nom[d], visited) for d in tache['dependances']) - 1
-        return base_score
+            # Ajustement du score en fonction des dépendances
+            if tache['dependances']:
+                return min(score(taches_par_nom[d], visited) for d in tache['dependances']) - 1
+            return base_score
 
-    return sorted(taches, key=score, reverse=True)
+        return sorted(taches, key=score, reverse=True)
 
-st.subheader("📌 Plan d'Action Priorisé")
-taches_ordonnee = prioriser_taches(st.session_state.taches)
+    st.subheader("📌 Plan d'Action Priorisé")
+    taches_ordonnee = prioriser_taches(st.session_state.taches)
 
-for i, tache in enumerate(taches_ordonnee, 1):
-    dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
-    st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
+    for i, tache in enumerate(taches_ordonnee, 1):
+        dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
+        st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
