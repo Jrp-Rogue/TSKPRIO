@@ -200,7 +200,6 @@ elif choix == "Plan d'Action":
     # 📋 Priorisation des tâches en fonction de la matrice d'Eisenhower et des dépendances
     taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
 
-    st.subheader("📌 Plan d'Action Priorisé")
 
     # Affichage des tâches priorisées avec numérotation
     for i, tache in enumerate(taches_ordonnee, 1):
