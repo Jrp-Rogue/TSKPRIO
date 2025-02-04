@@ -292,5 +292,5 @@ def sauvegarder_planification():
     st.dataframe(df)
 
     st.session_state.planification.append(nouvelle_tache)
-            sauvegarder_planification()  # Sauvegarde après ajout
+                sauvegarder_planification()  # Sauvegarde après ajout
 
