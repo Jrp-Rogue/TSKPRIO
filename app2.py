@@ -31,7 +31,7 @@ if "taches" not in st.session_state:
     st.session_state.taches = charger_taches()
 
 # 📌 Menu de navigation
-menu = ["Ajouter une tâche", "Modifier ou supprimer une tâche", "Matrice d'Eisenhower", "Plan d'Action"]
+menu = ["Ajouter une tâche", "Modifier ou supprimer une tâche", "Matrice d'Eisenhower", "Plan d'Action", "Planification Hebdomadaire"]
 choix = st.sidebar.selectbox("Sélectionner une option", menu)
 
 # 📌 Ajouter une tâche
@@ -228,3 +228,30 @@ elif choix == "Plan d'Action":
     for i, tache in enumerate(taches_ordonnee, 1):
         dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
         st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
+
+# 📅 Planification hebdomadaire
+elif choix == "Planification Hebdomadaire":
+    st.subheader("📅 Planification Hebdomadaire")
+
+    jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+
+    # Initialisation de l'état si non existant
+    if "planification" not in st.session_state:
+        st.session_state.planification = {jour: [] for jour in jours_semaine}
+
+    # Interface pour assigner les tâches aux jours
+    for jour in jours_semaine:
+        taches_selectionnees = st.multiselect(
+            f"Tâches pour {jour}",
+            options=[t["nom"] for t in st.session_state.taches],  # Liste des tâches
+            default=st.session_state.planification[jour],  # Valeurs actuelles
+            key=f"planif_{jour}"
+        )
+        st.session_state.planification[jour] = taches_selectionnees  # Mise à jour
+
+    # Affichage de la planification sous forme de tableau
+    st.subheader("🗓️ Vue hebdomadaire")
+    table = {jour: ", ".join(st.session_state.planification[jour]) or "Aucune tâche" for jour in jours_semaine}
+
+    st.write(pd.DataFrame(table, index=["Tâches"]))
+
