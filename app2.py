@@ -262,14 +262,25 @@ elif choix == "Planification Hebdomadaire":
 
     # Interface pour assigner les tâches aux jours
     for jour in jours_semaine:
+        # Liste des tâches disponibles
+        options_taches = [t["nom"] for t in st.session_state.taches]
+        
+        # Récupère les tâches sélectionnées pour ce jour, et filtre les tâches supprimées
+        taches_selectionnees = st.session_state.planifications[jour]
+        taches_selectionnees_valides = [tache for tache in taches_selectionnees if tache in options_taches]
+    
+        # Met à jour les tâches sélectionnées dans le multiselect avec la liste des options valides
         taches_selectionnees = st.multiselect(
             f"Tâches pour {jour}",
-            options=[t["nom"] for t in st.session_state.taches],  # Liste des tâches
-            default=st.session_state.planifications[jour],  # Valeurs actuelles
+            options=options_taches,
+            default=taches_selectionnees_valides,  # Valeurs actuelles, uniquement celles valides
             key=f"planif_{jour}"
         )
-        st.session_state.planifications[jour] = taches_selectionnees  # Mise à jour
-        sauvegarder_planification()  # 📌 Sauvegarde automatique après modification
+    
+        # Mise à jour de la planification
+        st.session_state.planifications[jour] = taches_selectionnees
+        sauvegarder_planification()  # Sauvegarde après modification
+    
 
     # 📌 Affichage de la planification sous forme de tableau
     st.subheader("🗓️ Vue hebdomadaire")
