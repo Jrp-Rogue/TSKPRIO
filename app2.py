@@ -75,6 +75,10 @@ elif choix == "Modifier ou supprimer une tâche":
         nouveau_nom = st.text_input("Nom de la tâche", value=tache_modifiee["nom"], key="nom_modify")
         nouvelle_urgence = st.slider("Niveau d'urgence", 1, 5, tache_modifiee["urgence"], key="urgence_modify")
         nouvelle_importance = st.slider("Niveau d'importance", 1, 5, tache_modifiee["importance"], key="importance_modify")
+        
+        # Définir les options de dépendances en utilisant les tâches existantes (sans la tâche actuelle)
+        options_dependances = [t["nom"] for t in st.session_state.taches if t["nom"] != tache_modifiee["nom"]]
+        
         nouvelles_dependances = st.multiselect("Tâches dont cette tâche dépend", options_dependances, default=tache_modifiee["dependances"], key="dependances_modify")
         
         if any(dep not in options_dependances for dep in nouvelles_dependances):
