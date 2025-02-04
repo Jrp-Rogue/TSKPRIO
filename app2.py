@@ -2,16 +2,20 @@ import streamlit as st
 import json
 import os
 import pandas as pd
+import requests
 
 # 📌 Nom du fichier pour stocker les tâches
 FILE_NAME = "taches.json"
 
 FICHIER_PLANIFICATION = "planification.json"
 
-def sauvegarder_planification():
-    """Sauvegarde la planification dans un fichier JSON."""
-    with open(FICHIER_PLANIFICATION, "w", encoding="utf-8") as f:
-        json.dump(st.session_state.planification, f)
+# Remplace avec ton propre repo et fichier
+GITHUB_REPO = "Jrp-Rogue/TSKPRIO"
+FICHIER_PLANIFICATION = "planification.json"
+BRANCH = "main"
+
+RAW_GITHUB_URL = f"https://raw.githubusercontent.com/{GITHUB_REPO}/{BRANCH}/{FICHIER_PLANIFICATION}"
+GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{FICHIER_PLANIFICATION}"
 
 def charger_planification():
     """Charge la planification depuis un fichier JSON."""
@@ -19,6 +23,13 @@ def charger_planification():
         with open(FICHIER_PLANIFICATION, "r", encoding="utf-8") as f:
             return json.load(f)
     return {jour: [] for jour in jours_semaine}
+
+def sauvegarder_planification():
+    """Sauvegarde la planification dans un fichier JSON."""
+    with open(FICHIER_PLANIFICATION, "w", encoding="utf-8") as f:
+        json.dump(st.session_state.planification, f)
+
+
 
 
 # 📌 Fonction pour charger les tâches depuis le fichier JSON
@@ -245,13 +256,12 @@ elif choix == "Plan d'Action":
         dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
         st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
 
-# 📅 Planification hebdomadaire
 elif choix == "Planification Hebdomadaire":
     st.subheader("📅 Planification Hebdomadaire")
 
     jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
-    # Charger la planification si elle existe
+    # Charger la planification depuis GitHub
     if "planification" not in st.session_state:
         st.session_state.planification = charger_planification()
 
@@ -265,22 +275,18 @@ elif choix == "Planification Hebdomadaire":
         )
         st.session_state.planification[jour] = taches_selectionnees  # Mise à jour
 
-    # Sauvegarde automatique après sélection
-    sauvegarder_planification()
+    # Bouton pour sauvegarder les données (copie manuelle sur GitHub)
+    if st.button("💾 Sauvegarder les tâches"):
+        sauvegarder_planification()
 
     # 📌 Affichage de la planification sous forme de tableau
     st.subheader("🗓️ Vue hebdomadaire")
 
-    # Trouver le nombre maximum de tâches pour définir le nombre de lignes du tableau
     max_tasks = max(len(taches) for taches in st.session_state.planification.values())
 
-    # Reformater les données pour que chaque tâche soit sur une ligne distincte
     table = {jour: (st.session_state.planification[jour] + [""] * (max_tasks - len(st.session_state.planification[jour])))
              for jour in jours_semaine}
 
-    # Création du DataFrame
     df = pd.DataFrame(table)
-
-    # Affichage sous forme de tableau
     st.dataframe(df)
 
