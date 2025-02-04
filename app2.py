@@ -265,6 +265,6 @@ elif choix == "Planification Hebdomadaire":
     df = pd.DataFrame([table])
     
 # Affichage avec `st.dataframe()` pour une meilleure lisibilité
-    st.dataframe(df)
+    st.dataframe(df.style.set_properties(**{'white-space': 'pre-wrap'}))
 
 
