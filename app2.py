@@ -131,7 +131,7 @@ elif choix == "Matrice d'Eisenhower":
         st.pyplot(fig)
 
     matrice = classifier_taches_eisenhower(st.session_state.taches)
-    afficher_matrice(matrice))
+    afficher_matrice(matrice)
 
 # 📌 Plan d'action
 elif choix == "Plan d'Action":
