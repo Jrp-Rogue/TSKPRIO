@@ -31,7 +31,7 @@ if "taches" not in st.session_state:
     st.session_state.taches = charger_taches()
 
 # 📌 Menu de navigation
-menu = ["Dashboard", "Ajouter une tâche", "Modifier ou supprimer une tâche", "Matrice d'Eisenhower", "Plan d'Action"]
+menu = ["Ajouter une tâche", "Modifier ou supprimer une tâche", "Matrice d'Eisenhower", "Plan d'Action"]
 choix = st.sidebar.selectbox("Sélectionner une option", menu)
 
 # 📌 Ajouter une tâche
