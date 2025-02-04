@@ -2,35 +2,9 @@ import streamlit as st
 import json
 import os
 import pandas as pd
-import requests
 
 # 📌 Nom du fichier pour stocker les tâches
 FILE_NAME = "taches.json"
-
-FICHIER_PLANIFICATION = "planification.json"
-
-# Remplace avec ton propre repo et fichier
-GITHUB_REPO = "Jrp-Rogue/TSKPRIO"
-FICHIER_PLANIFICATION = "planification.json"
-BRANCH = "main"
-
-RAW_GITHUB_URL = f"https://raw.githubusercontent.com/{GITHUB_REPO}/{BRANCH}/{FICHIER_PLANIFICATION}"
-GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{FICHIER_PLANIFICATION}"
-
-def charger_planification():
-    """Charge la planification depuis un fichier JSON."""
-    if os.path.exists(FICHIER_PLANIFICATION):
-        with open(FICHIER_PLANIFICATION, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {jour: [] for jour in jours_semaine}
-
-def sauvegarder_planification():
-    """Sauvegarde la planification dans un fichier JSON."""
-    with open(FICHIER_PLANIFICATION, "w", encoding="utf-8") as f:
-        json.dump(st.session_state.planification, f)
-
-
-
 
 # 📌 Fonction pour charger les tâches depuis le fichier JSON
 def charger_taches():
@@ -256,14 +230,15 @@ elif choix == "Plan d'Action":
         dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
         st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
 
+# 📅 Planification hebdomadaire
 elif choix == "Planification Hebdomadaire":
     st.subheader("📅 Planification Hebdomadaire")
 
     jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
-    # Charger la planification depuis GitHub
+    # Initialisation de l'état si non existant
     if "planification" not in st.session_state:
-        st.session_state.planification = charger_planification()
+        st.session_state.planification = {jour: [] for jour in jours_semaine}
 
     # Interface pour assigner les tâches aux jours
     for jour in jours_semaine:
@@ -275,18 +250,8 @@ elif choix == "Planification Hebdomadaire":
         )
         st.session_state.planification[jour] = taches_selectionnees  # Mise à jour
 
-    # Bouton pour sauvegarder les données (copie manuelle sur GitHub)
-    if st.button("💾 Sauvegarder les tâches"):
-        sauvegarder_planification()
-
-    # 📌 Affichage de la planification sous forme de tableau
+    # Affichage de la planification sous forme de tableau
     st.subheader("🗓️ Vue hebdomadaire")
+    table = {jour: ", ".join(st.session_state.planification[jour]) or "Aucune tâche" for jour in jours_semaine}
 
-    max_tasks = max(len(taches) for taches in st.session_state.planification.values())
-
-    table = {jour: (st.session_state.planification[jour] + [""] * (max_tasks - len(st.session_state.planification[jour])))
-             for jour in jours_semaine}
-
-    df = pd.DataFrame(table)
-    st.dataframe(df)
-
+    st.write(pd.DataFrame(table, index=["Tâches"]))
