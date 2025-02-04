@@ -285,7 +285,7 @@ def sauvegarder_planification():
     table = {jour: (st.session_state.planification[jour] + [""] * (max_tasks - len(st.session_state.planification[jour])))
              for jour in jours_semaine}
 
-    st.session_state.planification.append(nouvelle_tache)
+    st.session_state.planification.append
     sauvegarder_planification()  # Sauvegarde après ajout
     
     # Création du DataFrame
