@@ -18,8 +18,6 @@ def sauvegarder_taches():
     with open("taches.json", "w") as f:
         json.dump(st.session_state.taches, f)
     st.success("Tâches sauvegardées dans taches.json!")
-    push_to_github()  # Push vers GitHub après chaque sauvegarde
-# Fonction pour pousser les changements vers GitHub
 
         
 # 📌 Fonction pour charger les tâches depuis un fichier JSON
