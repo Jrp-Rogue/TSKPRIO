@@ -96,9 +96,7 @@ if choix == "Ajouter une tâche":
         st.session_state.taches.append(nouvelle_tache)
         sauvegarder_taches()  # Sauvegarde après ajout ✅
         st.success(f"Tâche '{nom}' ajoutée !")
-
-        # ✅ On force le rafraîchissement **après** avoir mis à jour les données
-        st.rerun()  
+ 
 
     # Affichage de l'erreur si besoin
     if erreur:
