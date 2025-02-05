@@ -56,6 +56,10 @@ choix = st.sidebar.selectbox("Sélectionner une option", menu)
 
 import streamlit as st
 
+# 📌 Initialisation correcte des tâches dans session_state
+if "taches" not in st.session_state:
+    st.session_state.taches = []
+
 # 📌 Ajouter une tâche
 if choix == "Ajouter une tâche":
     st.subheader("➕ Ajouter une tâche")
@@ -78,7 +82,7 @@ if choix == "Ajouter une tâche":
         erreur = "Le nom de la tâche est requis."
     elif any(dep not in options_dependances for dep in dependances):
         erreur = "Une ou plusieurs dépendances sélectionnées n'existent pas."
-    elif any(t["nom"].lower() == nom.lower() for t in st.session_state.taches):  # Vérifie existence
+    elif any(t["nom"].strip().lower() == nom.lower() for t in st.session_state.taches):  # Vérifie existence sans espaces parasites
         erreur = f"Une tâche avec le nom '{nom}' existe déjà !"
 
     # 🔘 Bouton d'ajout (désactivé si erreur)
@@ -90,13 +94,16 @@ if choix == "Ajouter une tâche":
             "dependances": dependances
         }
         st.session_state.taches.append(nouvelle_tache)
-        sauvegarder_taches()  # Sauvegarde après ajout
+        sauvegarder_taches()  # Sauvegarde après ajout ✅
         st.success(f"Tâche '{nom}' ajoutée !")
-        st.rerun()  # ✅ Rafraîchir l'application
+
+        # ✅ On force le rafraîchissement **après** avoir mis à jour les données
+        st.experimental_rerun()  
 
     # Affichage de l'erreur si besoin
     if erreur:
         st.error(erreur)
+
 
 
 # 📌 Modifier ou supprimer une tâche
