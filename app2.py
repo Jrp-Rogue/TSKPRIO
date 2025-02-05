@@ -57,30 +57,45 @@ choix = st.sidebar.selectbox("Sélectionner une option", menu)
 # 📌 Ajouter une tâche
 if choix == "Ajouter une tâche":
     st.subheader("➕ Ajouter une tâche")
-    nom = st.text_input("Nom de la tâche :")
+
+    # 📌 Saisie du nom
+    nom = st.text_input("Nom de la tâche :").strip()
+
+    # 📌 Sélection des niveaux d'urgence et d'importance
     urgence = st.slider("Niveau d'urgence", 1, 5, 3, key="urgence_add")
     importance = st.slider("Niveau d'importance", 1, 5, 3, key="importance_add")
-    
-    # Sélection des dépendances parmi les tâches existantes
+
+    # 📌 Sélection des dépendances parmi les tâches existantes
     options_dependances = [t["nom"] for t in st.session_state.taches]
     dependances = st.multiselect("Tâches dont cette tâche dépend :", options_dependances, key="dependances_add")
 
-    if any(dep not in options_dependances for dep in dependances):
-        st.error("Une ou plusieurs dépendances n'existent pas dans les tâches actuelles.")
-    
-    if st.button("Ajouter la tâche"):
-        if nom:
-            nouvelle_tache = {
-                "nom": nom,
-                "urgence": urgence,
-                "importance": importance,
-                "dependances": dependances
-            }
-            st.session_state.taches.append(nouvelle_tache)
-            sauvegarder_taches()  # Sauvegarde après ajout
-            st.success(f"Tâche '{nom}' ajoutée !")
-        else:
-            st.error("Le nom de la tâche est requis.")
+    # 🔍 Vérifications et feedback utilisateur
+    erreur = None
+
+    if not nom:
+        erreur = "Le nom de la tâche est requis."
+    elif nom in options_dependances:
+        erreur = f"Une tâche avec le nom '{nom}' existe déjà !"
+    elif any(dep not in options_dependances for dep in dependances):
+        erreur = "Une ou plusieurs dépendances sélectionnées n'existent pas."
+
+    # 🔘 Bouton d'ajout (désactivé si erreur)
+    if st.button("Ajouter la tâche", disabled=bool(erreur)):
+        nouvelle_tache = {
+            "nom": nom,
+            "urgence": urgence,
+            "importance": importance,
+            "dependances": dependances
+        }
+        st.session_state.taches.append(nouvelle_tache)
+        sauvegarder_taches()  # Sauvegarde après ajout
+        st.success(f"Tâche '{nom}' ajoutée !")
+        st.experimental_rerun()  # Rafraîchir la liste
+
+    # Affichage de l'erreur si besoin
+    if erreur:
+        st.error(erreur)
+
 
 # 📌 Modifier ou supprimer une tâche
 elif choix == "Modifier ou supprimer une tâche":
