@@ -186,9 +186,8 @@ elif choix == "Matrice d'Eisenhower":
         st.error("Aucune tâche disponible pour classer.")
     
 
-# 📌 Plan d'action
+# 📌 Plan d'Action
 elif choix == "Plan d'Action":
-
     st.subheader("📌 Plan d'Action")
 
     def classifier_taches_eisenhower(taches):
@@ -211,52 +210,48 @@ elif choix == "Plan d'Action":
         return matrice
 
     def prioriser_taches(taches, matrice):
-        """Trie les tâches en prenant en compte la dépendance, la priorité et la matrice d'Eisenhower."""
+        """Trie les tâches en prenant en compte la dépendance et la priorité Eisenhower"""
         taches_par_nom = {t['nom']: t for t in taches}
 
-        # Fonction pour obtenir le score d'une tâche basé sur la matrice
-        def score(tache, visited=None):
-            if visited is None:
-                visited = set()
-            if tache['nom'] in visited:
-                return float('-inf')  # Évite les boucles infinies
-            visited.add(tache['nom'])
-
-            # Score basé sur la matrice d'Eisenhower (urgence et importance)
+        # Définition des scores basés sur la matrice
+        def score_eisenhower(tache):
             if tache in matrice['Important & Urgent']:
-                base_score = 4
+                return 4
             elif tache in matrice['Important mais Pas Urgent']:
-                base_score = 3
+                return 3
             elif tache in matrice['Pas Important mais Urgent']:
-                base_score = 2
+                return 2
             else:
-                base_score = 1
+                return 1
 
-            # Ajustement du score en fonction des dépendances
-            if tache['dependances']:
-                max_dependance_score = max(score(taches_par_nom[d], visited) for d in tache['dependances'])
-                # Le score ajusté ne sera pas inférieur à la priorité de la matrice
-                base_score = max(base_score, max_dependance_score)
+        # Gestion des dépendances avec tri topologique (Kahn’s Algorithm)
+        def trier_par_dependance(taches):
+            """Trie les tâches en respectant leurs dépendances"""
+            ordre = []
+            dependencies = {t['nom']: set(t['dependances']) for t in taches}
+            independantes = [t for t in taches if not dependencies[t['nom']]]
 
-            return base_score
+            while independantes:
+                tache = independantes.pop(0)
+                ordre.append(tache)
 
-        # On utilise le score calculé pour trier les tâches
-        taches_triees = sorted(taches, key=score, reverse=True)
+                for t in taches:
+                    if t['nom'] in dependencies and tache['nom'] in dependencies[t['nom']]:
+                        dependencies[t['nom']].remove(tache['nom'])
+                        if not dependencies[t['nom']]:  # Si plus de dépendance, on peut l'ajouter
+                            independantes.append(t)
 
-        # On fait en sorte que les tâches dépendantes soient priorisées avant celles qui en dépendent
-        taches_finales = []
-        taches_deja_affichees = set()
+            if len(ordre) != len(taches):  # Dépendance circulaire détectée
+                st.error("⚠️ Dépendances circulaires détectées ! Vérifiez les tâches.")
+                return []
 
-        # On place les tâches qui n'ont pas de dépendances en premier
-        for tache in taches_triees:
-            if not tache['dependances']:
-                taches_finales.append(tache)
-                taches_deja_affichees.add(tache['nom'])
+            return ordre
 
-        # Ensuite, on place les tâches dépendantes
-        for tache in taches_triees:
-            if tache['nom'] not in taches_deja_affichees:
-                taches_finales.append(tache)
+        # Classement initial des tâches par priorité Eisenhower
+        taches_triees = sorted(taches, key=score_eisenhower, reverse=True)
+
+        # Tri final en respectant les dépendances
+        taches_finales = trier_par_dependance(taches_triees)
 
         return taches_finales
 
@@ -266,10 +261,13 @@ elif choix == "Plan d'Action":
     # 📋 Priorisation des tâches en fonction de la matrice d'Eisenhower et des dépendances
     taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
 
-    # Affichage des tâches priorisées avec numérotation
-    for i, tache in enumerate(taches_ordonnee, 1):
-        dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
-        st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
+    # 📝 Affichage des tâches priorisées
+    if taches_ordonnee:
+        for i, tache in enumerate(taches_ordonnee, 1):
+            dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
+            st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
+    else:
+        st.warning("Aucune tâche à afficher ou problème détecté dans les dépendances.")
 
 # 📅 Planification hebdomadaire
 elif choix == "Planification Hebdomadaire":
