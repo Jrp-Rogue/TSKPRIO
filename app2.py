@@ -210,50 +210,44 @@ elif choix == "Plan d'Action":
         return matrice
 
     def prioriser_taches(taches, matrice):
-        """Trie les tâches en prenant en compte la dépendance et la priorité Eisenhower"""
+        """Trie les tâches en fonction de leur priorité Eisenhower et des dépendances"""
         taches_par_nom = {t['nom']: t for t in taches}
 
-        # Définition des scores basés sur la matrice
+        # Score basé sur importance & urgence
         def score_eisenhower(tache):
-            if tache in matrice['Important & Urgent']:
-                return 4
-            elif tache in matrice['Important mais Pas Urgent']:
-                return 3
-            elif tache in matrice['Pas Important mais Urgent']:
-                return 2
-            else:
-                return 1
+            return tache['importance'] * 10 + tache['urgence']  # Pondération pour éviter égalités
 
-        # Gestion des dépendances avec tri topologique (Kahn’s Algorithm)
-        def trier_par_dependance(taches):
-            """Trie les tâches en respectant leurs dépendances"""
-            ordre = []
-            dependencies = {t['nom']: set(t['dependances']) for t in taches}
-            independantes = [t for t in taches if not dependencies[t['nom']]]
+        # Construire le graphe des dépendances
+        dependencies = {t['nom']: set(t['dependances']) for t in taches}
+        dependants = {t['nom']: set() for t in taches}
+        for t in taches:
+            for d in t['dependances']:
+                dependants[d].add(t['nom'])
 
-            while independantes:
-                tache = independantes.pop(0)
-                ordre.append(tache)
-
-                for t in taches:
-                    if t['nom'] in dependencies and tache['nom'] in dependencies[t['nom']]:
-                        dependencies[t['nom']].remove(tache['nom'])
-                        if not dependencies[t['nom']]:  # Si plus de dépendance, on peut l'ajouter
-                            independantes.append(t)
-
-            if len(ordre) != len(taches):  # Dépendance circulaire détectée
-                st.error("⚠️ Dépendances circulaires détectées ! Vérifiez les tâches.")
-                return []
-
-            return ordre
-
-        # Classement initial des tâches par priorité Eisenhower
+        # Liste des tâches triées en priorité Eisenhower
         taches_triees = sorted(taches, key=score_eisenhower, reverse=True)
 
-        # Tri final en respectant les dépendances
-        taches_finales = trier_par_dependance(taches_triees)
+        # Liste finale et tâches prêtes à être placées
+        ordre_final = []
+        pretes = [t for t in taches_triees if not dependencies[t['nom']]]
 
-        return taches_finales
+        while pretes:
+            # Trier les tâches prêtes selon leur score Eisenhower (priorité absolue)
+            pretes.sort(key=score_eisenhower, reverse=True)
+            tache = pretes.pop(0)
+            ordre_final.append(tache)
+
+            # Libérer les tâches dépendantes maintenant que celle-ci est placée
+            for dependant in dependants[tache['nom']]:
+                dependencies[dependant].remove(tache['nom'])
+                if not dependencies[dependant]:  # Si plus de dépendances, elle devient "prête"
+                    pretes.append(taches_par_nom[dependant])
+
+        if len(ordre_final) != len(taches):  # Détection de boucles de dépendances
+            st.error("⚠️ Dépendances circulaires détectées ! Vérifiez les tâches.")
+            return []
+
+        return ordre_final
 
     # 📊 Génération de la matrice d'Eisenhower
     matrice = classifier_taches_eisenhower(st.session_state.taches)
