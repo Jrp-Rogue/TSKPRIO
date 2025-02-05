@@ -98,7 +98,7 @@ if choix == "Ajouter une tâche":
         st.success(f"Tâche '{nom}' ajoutée !")
 
         # ✅ On force le rafraîchissement **après** avoir mis à jour les données
-        st.experimental_rerun()  
+        st.rerun()  
 
     # Affichage de l'erreur si besoin
     if erreur:
