@@ -85,37 +85,59 @@ if choix == "Ajouter une tâche":
 # 📌 Modifier ou supprimer une tâche
 elif choix == "Modifier ou supprimer une tâche":
     st.subheader("✏️ Modifier ou supprimer une tâche")
+
+    if not st.session_state.taches:
+        st.warning("Aucune tâche disponible.")
+        st.stop()
+
     taches_existantes = [t["nom"] for t in st.session_state.taches]
     tache_selectionnee = st.selectbox("Sélectionner une tâche", taches_existantes)
 
     if tache_selectionnee:
+        # Copie de la tâche sélectionnée
         tache_modifiee = next(t for t in st.session_state.taches if t["nom"] == tache_selectionnee)
-        
-        # Champs pour modifier la tâche
-        nouveau_nom = st.text_input("Nom de la tâche", value=tache_modifiee["nom"], key="nom_modify")
-        nouvelle_urgence = st.slider("Niveau d'urgence", 1, 5, tache_modifiee["urgence"], key="urgence_modify")
-        nouvelle_importance = st.slider("Niveau d'importance", 1, 5, tache_modifiee["importance"], key="importance_modify")
-        
-        # Définir les options de dépendances en utilisant les tâches existantes (sans la tâche actuelle)
+        tache_temp = tache_modifiee.copy()  # Éviter les modifications directes avant validation
+
+        # Champs de modification
+        tache_temp["nom"] = st.text_input("Nom de la tâche", value=tache_modifiee["nom"], key="nom_modify")
+        tache_temp["urgence"] = st.slider("Niveau d'urgence", 1, 5, tache_modifiee["urgence"], key="urgence_modify")
+        tache_temp["importance"] = st.slider("Niveau d'importance", 1, 5, tache_modifiee["importance"], key="importance_modify")
+
+        # Dépendances
         options_dependances = [t["nom"] for t in st.session_state.taches if t["nom"] != tache_modifiee["nom"]]
-        
-        nouvelles_dependances = st.multiselect("Tâches dont cette tâche dépend", options_dependances, default=tache_modifiee["dependances"], key="dependances_modify")
-        
-        if any(dep not in options_dependances for dep in nouvelles_dependances):
+        tache_temp["dependances"] = st.multiselect(
+            "Tâches dont cette tâche dépend", 
+            options_dependances, 
+            default=tache_modifiee["dependances"], 
+            key="dependances_modify"
+        )
+
+        if any(dep not in options_dependances for dep in tache_temp["dependances"]):
             st.error("Une ou plusieurs dépendances n'existent pas dans les tâches actuelles.")
-        
+
+        # Modification de la tâche
         if st.button("Modifier la tâche"):
-            if nouveau_nom:
-                tache_modifiee.update({"nom": nouveau_nom, "urgence": nouvelle_urgence, "importance": nouvelle_importance, "dependances": nouvelles_dependances})
-                sauvegarder_taches()  # Sauvegarde après modification
-                st.success(f"Tâche '{nouveau_nom}' modifiée !")
+            if tache_temp["nom"].strip():
+                index = st.session_state.taches.index(tache_modifiee)
+                st.session_state.taches[index] = tache_temp  # Remplacement dans la liste
+                sauvegarder_taches()
+                st.success(f"Tâche '{tache_temp['nom']}' modifiée !")
+                st.rerun()
             else:
                 st.error("Le nom de la tâche est requis.")
-        
+
+        # Suppression de la tâche (avec vérification des dépendances)
         if st.button("Supprimer la tâche"):
-            st.session_state.taches = [t for t in st.session_state.taches if t["nom"] != tache_selectionnee]
-            sauvegarder_taches()  # Sauvegarde après suppression
-            st.success(f"Tâche '{tache_selectionnee}' supprimée !")
+            taches_dependantes = [t["nom"] for t in st.session_state.taches if tache_selectionnee in t["dependances"]]
+
+            if taches_dependantes:
+                st.error(f"Impossible de supprimer cette tâche. Elle est une dépendance pour : {', '.join(taches_dependantes)}.")
+            else:
+                st.session_state.taches = [t for t in st.session_state.taches if t["nom"] != tache_selectionnee]
+                sauvegarder_taches()
+                st.success(f"Tâche '{tache_selectionnee}' supprimée !")
+                st.rerun()
+
 
 # 📌 Matrice d'Eisenhower
 elif choix == "Matrice d'Eisenhower":
