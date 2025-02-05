@@ -98,7 +98,7 @@ if choix == "Ajouter une tâche":
         st.success(f"Tâche '{nom}' ajoutée !")
 
         # ✅ On force le rafraîchissement **après** avoir mis à jour les données
-        st.rerun()  
+        st.experimental_rerun()  
 
     # Affichage de l'erreur si besoin
     if erreur:
@@ -337,4 +337,3 @@ elif choix == "Planification Hebdomadaire":
     
     # Affichage sous forme de tableau
     st.dataframe(df)
-
