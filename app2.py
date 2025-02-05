@@ -54,6 +54,8 @@ if "taches" not in st.session_state:
 menu = ["Ajouter une tâche", "Modifier ou supprimer une tâche", "Matrice d'Eisenhower", "Plan d'Action", "Planification Hebdomadaire"]
 choix = st.sidebar.selectbox("Sélectionner une option", menu)
 
+import streamlit as st
+
 # 📌 Ajouter une tâche
 if choix == "Ajouter une tâche":
     st.subheader("➕ Ajouter une tâche")
@@ -90,11 +92,12 @@ if choix == "Ajouter une tâche":
         st.session_state.taches.append(nouvelle_tache)
         sauvegarder_taches()  # Sauvegarde après ajout
         st.success(f"Tâche '{nom}' ajoutée !")
-        st.experimental_rerun()  # Rafraîchir la liste
+        st.rerun()  # ✅ Correction ici : rafraîchir l'application
 
     # Affichage de l'erreur si besoin
     if erreur:
         st.error(erreur)
+
 
 
 # 📌 Modifier ou supprimer une tâche
