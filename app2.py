@@ -238,10 +238,10 @@ elif choix == "Matrice d'Eisenhower":
 
         # Ajout d'une légende
         legend_labels = [
-            ("Rouge", "Important & Urgent"),
-            ("Orange", "Important mais Pas Urgent"),
-            ("Bleu", "Pas Important mais Urgent"),
-            ("Gris", "Pas Important & Pas Urgent")
+            ("Rouge", "A faire"),
+            ("Orange", "A planifier"),
+            ("Bleu", "A déléguer"),
+            ("Gris", "A abandonner")
         ]
         for i, (color, label) in enumerate(legend_labels):
             ax.text(0.5, -0.2 - (i * 0.08), f"{color} : {label}", ha="center", va="center", fontsize=10, color='black')
