@@ -163,6 +163,9 @@ elif choix == "Modifier ou supprimer une tâche":
 
 # 📌 Matrice d'Eisenhower
 elif choix == "Matrice d'Eisenhower":
+    import matplotlib.pyplot as plt
+    import textwrap
+
     def classifier_taches_eisenhower(taches):
         """Classe les tâches selon la matrice d'Eisenhower"""
         matrice = {
@@ -181,32 +184,75 @@ elif choix == "Matrice d'Eisenhower":
             else:
                 matrice['Pas Important & Pas Urgent'].append(tache)
         return matrice
-    
+
     def afficher_matrice(matrice):
-        import matplotlib.pyplot as plt
         fig, ax = plt.subplots(figsize=(10, 10))
         ax.set_xlim(0, 2)
         ax.set_ylim(0, 2)
+        
+        # Grille de la matrice
         ax.axhline(y=1, color='black', linewidth=2)
         ax.axvline(x=1, color='black', linewidth=2)
-        colors = {'Important & Urgent': 'red', 'Important mais Pas Urgent': 'orange', 'Pas Important mais Urgent': 'blue', 'Pas Important & Pas Urgent': 'gray'}
         
+        colors = {
+            'Important & Urgent': 'red',
+            'Important mais Pas Urgent': 'orange',
+            'Pas Important mais Urgent': 'blue',
+            'Pas Important & Pas Urgent': 'gray'
+        }
+        
+        positions = {
+            'Important & Urgent': (0, 1),
+            'Important mais Pas Urgent': (1, 1),
+            'Pas Important mais Urgent': (0, 0),
+            'Pas Important & Pas Urgent': (1, 0)
+        }
+
         for categorie, taches_liste in matrice.items():
-            x, y = (0, 1) if categorie == 'Important & Urgent' else (1, 1) if categorie == 'Important mais Pas Urgent' else (0, 0) if categorie == 'Pas Important mais Urgent' else (1, 0)
-            ax.add_patch(plt.Rectangle((x, y), 1, 1, color=colors[categorie], alpha=0.3))
-            ax.text(x + 0.5, y + 1.05, categorie, ha='center', va='center', fontsize=12, fontweight='bold', color='black')
-            for i, tache in enumerate(taches_liste):
-                ax.text(x + 0.5, y + 1.05 - (i + 1) * 0.15, tache["nom"], ha='center', va='center', fontsize=10, color='black')
-        ax.set_xticks([0.5, 1.5])
-        ax.set_yticks([0.5, 1.5])
+            x, y = positions[categorie]
+            
+            # Ajout des couleurs de fond
+            ax.add_patch(plt.Rectangle((x, y), 1, 1, color=colors[categorie], alpha=0.3, edgecolor="black", linewidth=2))
+
+            # Titre de chaque section
+            ax.text(x + 0.5, y + 0.9, categorie, ha='center', va='center', fontsize=12, fontweight='bold', color='black')
+
+            # 🔹 Gestion automatique du placement des tâches
+            max_tasks = 6  # Nombre max de tâches affichées par case
+            task_spacing = 0.12 if len(taches_liste) <= max_tasks else 0.08  # Ajustement de l'espace
+            
+            for i, tache in enumerate(taches_liste[:max_tasks]):  # Affiche max `max_tasks` tâches
+                offset_y = 0.75 - (i * task_spacing)
+                wrapped_text = "\n".join(textwrap.wrap(tache["nom"], width=20))  # Coupe les noms trop longs
+                ax.text(x + 0.5, y + offset_y, wrapped_text, ha='center', va='center', fontsize=10, color='black')
+
+            # Si trop de tâches, affiche "et X autres..."
+            if len(taches_liste) > max_tasks:
+                ax.text(x + 0.5, y + 0.75 - (max_tasks * task_spacing), f"...et {len(taches_liste) - max_tasks} autres",
+                        ha='center', va='center', fontsize=9, color='black', fontweight='bold')
+
+        # Masque les axes
+        ax.set_xticks([])
+        ax.set_yticks([])
         ax.axis('off')
+
+        # Ajout d'une légende
+        legend_labels = [
+            ("Rouge", "Important & Urgent"),
+            ("Orange", "Important mais Pas Urgent"),
+            ("Bleu", "Pas Important mais Urgent"),
+            ("Gris", "Pas Important & Pas Urgent")
+        ]
+        for i, (color, label) in enumerate(legend_labels):
+            ax.text(0.5, -0.2 - (i * 0.08), f"{color} : {label}", ha="center", va="center", fontsize=10, color='black')
+
         st.pyplot(fig)
+
     if "taches" in st.session_state and len(st.session_state.taches) > 0:
         matrice = classifier_taches_eisenhower(st.session_state.taches)
-        afficher_matrice(matrice)   
+        afficher_matrice(matrice)
     else:
         st.error("Aucune tâche disponible pour classer.")
-    
 
 # 📌 Plan d'Action
 elif choix == "Plan d'Action":
