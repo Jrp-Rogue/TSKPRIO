@@ -54,8 +54,6 @@ if "taches" not in st.session_state:
 menu = ["Ajouter une tâche", "Modifier ou supprimer une tâche", "Matrice d'Eisenhower", "Plan d'Action", "Planification Hebdomadaire"]
 choix = st.sidebar.selectbox("Sélectionner une option", menu)
 
-import streamlit as st
-
 # 📌 Initialisation correcte des tâches dans session_state
 if "taches" not in st.session_state:
     st.session_state.taches = []
@@ -96,13 +94,10 @@ if choix == "Ajouter une tâche":
         st.session_state.taches.append(nouvelle_tache)
         sauvegarder_taches()  # Sauvegarde après ajout ✅
         st.success(f"Tâche '{nom}' ajoutée !")
- 
 
     # Affichage de l'erreur si besoin
     if erreur:
         st.error(erreur)
-
-
 
 # 📌 Modifier ou supprimer une tâche
 elif choix == "Modifier ou supprimer une tâche":
@@ -160,7 +155,6 @@ elif choix == "Modifier ou supprimer une tâche":
                 st.success(f"Tâche '{tache_selectionnee}' supprimée !")
                 st.rerun()
 
-
 # 📌 Matrice d'Eisenhower
 elif choix == "Matrice d'Eisenhower":
     import matplotlib.pyplot as plt
@@ -189,18 +183,18 @@ elif choix == "Matrice d'Eisenhower":
         fig, ax = plt.subplots(figsize=(10, 10))
         ax.set_xlim(0, 2)
         ax.set_ylim(0, 2)
-        
+
         # Grille de la matrice
         ax.axhline(y=1, color='black', linewidth=2)
         ax.axvline(x=1, color='black', linewidth=2)
-        
+
         colors = {
             'Important & Urgent': 'red',
             'Important mais Pas Urgent': 'orange',
             'Pas Important mais Urgent': 'blue',
             'Pas Important & Pas Urgent': 'gray'
         }
-        
+
         positions = {
             'Important & Urgent': (0, 1),
             'Important mais Pas Urgent': (1, 1),
@@ -210,174 +204,59 @@ elif choix == "Matrice d'Eisenhower":
 
         for categorie, taches_liste in matrice.items():
             x, y = positions[categorie]
-            
+
             # Ajout des couleurs de fond
-            ax.add_patch(plt.Rectangle((x, y), 1, 1, color=colors[categorie], alpha=0.3, edgecolor="black", linewidth=2))
+            ax.add_patch(plt.Rectangle((x, y), 1, 1, color=colors[categorie], alpha=0.2))
 
-            # Titre de chaque section
-            ax.text(x + 0.5, y + 0.9, categorie, ha='center', va='center', fontsize=12, fontweight='bold', color='black')
+            # Affichage des tâches par catégorie
+            for idx, tache in enumerate(taches_liste):
+                ax.text(x + 0.1, y + 0.1 + idx * 0.15, 
+                        f"{tache['nom']}", 
+                        ha='left', va='top', fontsize=10, 
+                        wrap=True)
 
-            # 🔹 Gestion automatique du placement des tâches
-            max_tasks = 6  # Nombre max de tâches affichées par case
-            task_spacing = 0.12 if len(taches_liste) <= max_tasks else 0.08  # Ajustement de l'espace
-            
-            for i, tache in enumerate(taches_liste[:max_tasks]):  # Affiche max `max_tasks` tâches
-                offset_y = 0.75 - (i * task_spacing)
-                wrapped_text = "\n".join(textwrap.wrap(tache["nom"], width=20))  # Coupe les noms trop longs
-                ax.text(x + 0.5, y + offset_y, wrapped_text, ha='center', va='center', fontsize=10, color='black')
-
-            # Si trop de tâches, affiche "et X autres..."
-            if len(taches_liste) > max_tasks:
-                ax.text(x + 0.5, y + 0.75 - (max_tasks * task_spacing), f"...et {len(taches_liste) - max_tasks} autres",
-                        ha='center', va='center', fontsize=9, color='black', fontweight='bold')
-
-        # Masque les axes
-        ax.set_xticks([])
-        ax.set_yticks([])
+        ax.set_title("Matrice d'Eisenhower", fontsize=14)
+        ax.set_xticks([0.5, 1.5])
+        ax.set_xticklabels(['Urgent', 'Pas Urgent'])
+        ax.set_yticks([0.5, 1.5])
+        ax.set_yticklabels(['Pas Important', 'Important'])
         ax.axis('off')
-
-        # Ajout d'une légende
-        legend_labels = [
-            ("Rouge", "A faire"),
-            ("Orange", "A planifier"),
-            ("Bleu", "A déléguer"),
-            ("Gris", "A abandonner")
-        ]
-        for i, (color, label) in enumerate(legend_labels):
-            ax.text(0.5, -0.2 - (i * 0.08), f"{color} : {label}", ha="center", va="center", fontsize=10, color='black')
-
         st.pyplot(fig)
 
-    if "taches" in st.session_state and len(st.session_state.taches) > 0:
-        matrice = classifier_taches_eisenhower(st.session_state.taches)
-        afficher_matrice(matrice)
-    else:
-        st.error("Aucune tâche disponible pour classer.")
-
-# 📌 Plan d'Action
-elif choix == "Plan d'Action":
-    st.subheader("📌 Plan d'Action")
-
-    def classifier_taches_eisenhower(taches):
-        """Classe les tâches selon la matrice d'Eisenhower"""
-        matrice = {
-            'Important & Urgent': [],
-            'Important mais Pas Urgent': [],
-            'Pas Important mais Urgent': [],
-            'Pas Important & Pas Urgent': []
-        }
-        for tache in taches:
-            if tache['importance'] >= 3 and tache['urgence'] >= 3:
-                matrice['Important & Urgent'].append(tache)
-            elif tache['importance'] >= 3 and tache['urgence'] < 3:
-                matrice['Important mais Pas Urgent'].append(tache)
-            elif tache['importance'] < 3 and tache['urgence'] >= 3:
-                matrice['Pas Important mais Urgent'].append(tache)
-            else:
-                matrice['Pas Important & Pas Urgent'].append(tache)
-        return matrice
-
-    def prioriser_taches(taches, matrice):
-        """Trie les tâches en fonction de leur priorité Eisenhower et des dépendances"""
-        taches_par_nom = {t['nom']: t for t in taches}
-
-        # Score basé sur importance & urgence
-        def score_eisenhower(tache):
-            return tache['importance'] * 10 + tache['urgence']  # Pondération pour éviter égalités
-
-        # Construire le graphe des dépendances
-        dependencies = {t['nom']: set(t['dependances']) for t in taches}
-        dependants = {t['nom']: set() for t in taches}
-        for t in taches:
-            for d in t['dependances']:
-                dependants[d].add(t['nom'])
-
-        # Liste des tâches triées en priorité Eisenhower
-        taches_triees = sorted(taches, key=score_eisenhower, reverse=True)
-
-        # Liste finale et tâches prêtes à être placées
-        ordre_final = []
-        pretes = [t for t in taches_triees if not dependencies[t['nom']]]
-
-        while pretes:
-            # Trier les tâches prêtes selon leur score Eisenhower (priorité absolue)
-            pretes.sort(key=score_eisenhower, reverse=True)
-            tache = pretes.pop(0)
-            ordre_final.append(tache)
-
-            # Libérer les tâches dépendantes maintenant que celle-ci est placée
-            for dependant in dependants[tache['nom']]:
-                dependencies[dependant].remove(tache['nom'])
-                if not dependencies[dependant]:  # Si plus de dépendances, elle devient "prête"
-                    pretes.append(taches_par_nom[dependant])
-
-        if len(ordre_final) != len(taches):  # Détection de boucles de dépendances
-            st.error("⚠️ Dépendances circulaires détectées ! Vérifiez les tâches.")
-            return []
-
-        return ordre_final
-
-    # 📊 Génération de la matrice d'Eisenhower
     matrice = classifier_taches_eisenhower(st.session_state.taches)
-    
-    # 📋 Priorisation des tâches en fonction de la matrice d'Eisenhower et des dépendances
-    taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
+    afficher_matrice(matrice)
 
-    # 📝 Affichage des tâches priorisées
-    if taches_ordonnee:
-        for i, tache in enumerate(taches_ordonnee, 1):
-            dependances_str = f" (Dépend de: {', '.join(tache['dependances'])})" if tache['dependances'] else ""
-            st.write(f"{i}. {tache['nom']} (🔴 Urgence: {tache['urgence']}, 🟢 Importance: {tache['importance']}){dependances_str}")
-    else:
-        st.warning("Aucune tâche à afficher ou problème détecté dans les dépendances.")
+# 📌 Plan d'action
+elif choix == "Plan d'Action":
+    st.subheader("📝 Plan d'Action")
+    st.write("Dans cette section, tu peux élaborer un plan d'action pour chaque tâche.")
+    # Ajouter un formulaire d'action détaillée si nécessaire
+    pass
 
-# 📅 Planification hebdomadaire
+# 📌 Planification hebdomadaire
 elif choix == "Planification Hebdomadaire":
-    st.subheader("📅 Planification Hebdomadaire")
+    st.subheader("🗓️ Planification Hebdomadaire")
 
-    jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
-
-    # Initialisation de l'état si non existant
+    # 📌 Charger ou initialiser la planification
     if "planifications" not in st.session_state:
         st.session_state.planifications = charger_planification()
 
-    # Interface pour assigner les tâches aux jours
-    for jour in jours_semaine:
-        # Liste des tâches disponibles
-        options_taches = [t["nom"] for t in st.session_state.taches]
-        
-        # Récupère les tâches sélectionnées pour ce jour, et filtre les tâches supprimées
-        taches_selectionnees = st.session_state.planifications[jour]
-        taches_selectionnees_valides = [tache for tache in taches_selectionnees if tache in options_taches]
+    jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
     
-        # Met à jour les tâches sélectionnées dans le multiselect avec la liste des options valides
-        taches_selectionnees = st.multiselect(
-            f"Tâches pour {jour}",
-            options=options_taches,
-            default=taches_selectionnees_valides,  # Valeurs actuelles, uniquement celles valides
-            key=f"planif_{jour}"
-        )
-    
-        # Mise à jour de la planification
-        st.session_state.planifications[jour] = taches_selectionnees
-        sauvegarder_planification()  # Sauvegarde après modification
+    for jour in jours:
+        st.write(f"### {jour}")
+        taches_jour = st.session_state.planifications.get(jour, [])
+        taches_jour = sorted(taches_jour, key=lambda t: (t["urgence"], t["importance"]), reverse=True)  # Tri selon la priorité
 
-    # 📌 Affichage de la planification sous forme de tableau
-    st.subheader("🗓️ Vue hebdomadaire")
-    
-    # Vérifie que `st.session_state.planifications` existe
-    if "planifications" not in st.session_state:
-        st.session_state.planifications = {jour: [] for jour in jours_semaine}
-    
-    # Trouver le nombre maximum de tâches pour définir le nombre de lignes du tableau
-    max_tasks = max(len(taches) for taches in st.session_state.planifications.values())
-    
-    # Reformater les données pour que chaque tâche soit sur une ligne distincte
-    table = {jour: (st.session_state.planifications[jour] + [""] * (max_tasks - len(st.session_state.planifications[jour])))
-             for jour in jours_semaine}
-    
-    # Création du DataFrame
-    df = pd.DataFrame(table)
-    
-    # Affichage sous forme de tableau
-    st.dataframe(df)
+        for t in taches_jour:
+            st.write(f"- {t['nom']} (Urgence: {t['urgence']}, Importance: {t['importance']})")
+
+        # 📌 Option pour ajouter une tâche au jour en cours
+        tache_selectionnee = st.selectbox(f"Ajouter une tâche pour {jour}", [t["nom"] for t in st.session_state.taches])
+
+        if st.button(f"Ajouter une tâche pour {jour}"):
+            if tache_selectionnee:
+                tache_ajoutee = next(t for t in st.session_state.taches if t["nom"] == tache_selectionnee)
+                st.session_state.planifications[jour].append(tache_ajoutee)
+                sauvegarder_planification() 
+                st.success(f"Tâche '{tache_ajoutee['nom']}' ajoutée à la planification de {jour}!")
