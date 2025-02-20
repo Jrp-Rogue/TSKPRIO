@@ -341,59 +341,15 @@ elif choix == "Planification Hebdomadaire":
     if "planifications" not in st.session_state:
         st.session_state.planifications = charger_planification()
 
-    # Fonction pour prioriser les tâches en fonction de leur urgence et importance, y compris les dépendances
-    def prioriser_taches_planification(taches):
-        """Trie les tâches en fonction de leur priorité Eisenhower et des dépendances"""
-        taches_par_nom = {t['nom']: t for t in taches}
-
-        # Score basé sur importance & urgence
-        def score_eisenhower(tache):
-            return tache['importance'] * 10 + tache['urgence']  # Pondération pour éviter égalités
-
-        # Construire le graphe des dépendances
-        dependencies = {t['nom']: set(t['dependances']) for t in taches}
-        dependants = {t['nom']: set() for t in taches}
-        for t in taches:
-            for d in t['dependances']:
-                dependants[d].add(t['nom'])
-
-        # Liste des tâches triées en priorité Eisenhower
-        taches_triees = sorted(taches, key=score_eisenhower, reverse=True)
-
-        # Liste finale et tâches prêtes à être placées
-        ordre_final = []
-        pretes = [t for t in taches_triees if not dependencies[t['nom']]]
-
-        while pretes:
-            # Trier les tâches prêtes selon leur score Eisenhower (priorité absolue)
-            pretes.sort(key=score_eisenhower, reverse=True)
-            tache = pretes.pop(0)
-            ordre_final.append(tache)
-
-            # Libérer les tâches dépendantes maintenant que celle-ci est placée
-            for dependant in dependants[tache['nom']]:
-                dependencies[dependant].remove(tache['nom'])
-                if not dependencies[dependant]:  # Si plus de dépendances, elle devient "prête"
-                    pretes.append(taches_par_nom[dependant])
-
-        if len(ordre_final) != len(taches):  # Détection de boucles de dépendances
-            st.error("⚠️ Dépendances circulaires détectées ! Vérifiez les tâches.")
-            return []
-
-        return ordre_final
-
-    # Priorisation des tâches
-    taches_ordonnee = prioriser_taches_planification(st.session_state.taches)
-
-    # Interface pour assigner les tâches aux jours, en affichant d'abord les plus prioritaires
+    # Interface pour assigner les tâches aux jours
     for jour in jours_semaine:
-        # Liste des tâches disponibles triées par priorité
-        options_taches = [t["nom"] for t in taches_ordonnee]
-
+        # Liste des tâches disponibles
+        options_taches = [t["nom"] for t in st.session_state.taches]
+        
         # Récupère les tâches sélectionnées pour ce jour, et filtre les tâches supprimées
         taches_selectionnees = st.session_state.planifications[jour]
         taches_selectionnees_valides = [tache for tache in taches_selectionnees if tache in options_taches]
-
+    
         # Met à jour les tâches sélectionnées dans le multiselect avec la liste des options valides
         taches_selectionnees = st.multiselect(
             f"Tâches pour {jour}",
@@ -401,27 +357,82 @@ elif choix == "Planification Hebdomadaire":
             default=taches_selectionnees_valides,  # Valeurs actuelles, uniquement celles valides
             key=f"planif_{jour}"
         )
-
+    
         # Mise à jour de la planification
         st.session_state.planifications[jour] = taches_selectionnees
         sauvegarder_planification()  # Sauvegarde après modification
 
     # 📌 Affichage de la planification sous forme de tableau
     st.subheader("🗓️ Vue hebdomadaire")
-    
-    # Vérifie que `st.session_state.planifications` existe
-    if "planifications" not in st.session_state:
-        st.session_state.planifications = {jour: [] for jour in jours_semaine}
-    
-    # Trouver le nombre maximum de tâches pour définir le nombre de lignes du tableau
-    max_tasks = max(len(taches) for taches in st.session_state.planifications.values())
-    
-    # Reformater les données pour que chaque tâche soit sur une ligne distincte
-    table = {jour: (st.session_state.planifications[jour] + [""] * (max_tasks - len(st.session_state.planifications[jour])))
-             for jour in jours_semaine}
-    
-    # Création du DataFrame
+
+    # Pour afficher le tableau en tenant compte de la priorisation (dépendances comprises),
+    # on définit ici les mêmes fonctions que dans "Plan d'Action".
+    def classifier_taches_eisenhower(taches):
+        """Classe les tâches selon la matrice d'Eisenhower"""
+        matrice = {
+            'Important & Urgent': [],
+            'Important mais Pas Urgent': [],
+            'Pas Important mais Urgent': [],
+            'Pas Important & Pas Urgent': []
+        }
+        for tache in taches:
+            if tache['importance'] >= 3 and tache['urgence'] >= 3:
+                matrice['Important & Urgent'].append(tache)
+            elif tache['importance'] >= 3 and tache['urgence'] < 3:
+                matrice['Important mais Pas Urgent'].append(tache)
+            elif tache['importance'] < 3 and tache['urgence'] >= 3:
+                matrice['Pas Important mais Urgent'].append(tache)
+            else:
+                matrice['Pas Important & Pas Urgent'].append(tache)
+        return matrice
+
+    def prioriser_taches(taches, matrice):
+        """Trie les tâches en fonction de leur priorité Eisenhower et des dépendances"""
+        taches_par_nom = {t['nom']: t for t in taches}
+
+        def score_eisenhower(tache):
+            return tache['importance'] * 10 + tache['urgence']
+
+        dependencies = {t['nom']: set(t['dependances']) for t in taches}
+        dependants = {t['nom']: set() for t in taches}
+        for t in taches:
+            for d in t['dependances']:
+                dependants[d].add(t['nom'])
+
+        taches_triees = sorted(taches, key=score_eisenhower, reverse=True)
+        ordre_final = []
+        pretes = [t for t in taches_triees if not dependencies[t['nom']]]
+
+        while pretes:
+            pretes.sort(key=score_eisenhower, reverse=True)
+            tache = pretes.pop(0)
+            ordre_final.append(tache)
+            for dependant in dependants[tache['nom']]:
+                dependencies[dependant].remove(tache['nom'])
+                if not dependencies[dependant]:
+                    pretes.append(taches_par_nom[dependant])
+
+        if len(ordre_final) != len(taches):
+            st.error("⚠️ Dépendances circulaires détectées ! Vérifiez les tâches.")
+            return []
+
+        return ordre_final
+
+    # Calcul de l'ordre global de priorisation pour toutes les tâches
+    matrice = classifier_taches_eisenhower(st.session_state.taches)
+    taches_ordonnee = prioriser_taches(st.session_state.taches, matrice)
+
+    # Pour chaque jour, trier les tâches planifiées selon leur ordre dans taches_ordonnee
+    planif_priorisee = {}
+    # Création d'un dictionnaire pour connaître l'indice de chaque tâche dans l'ordre prioritaire
+    ordre_global = {t['nom']: i for i, t in enumerate(taches_ordonnee)}
+    for jour in jours_semaine:
+        taches_jour = st.session_state.planifications[jour]
+        taches_jour_triees = sorted(taches_jour, key=lambda nom: ordre_global.get(nom, float('inf')))
+        planif_priorisee[jour] = taches_jour_triees
+
+    # Création du tableau à partir des tâches planifiées triées
+    max_tasks = max(len(taches) for taches in planif_priorisee.values())
+    table = {jour: (planif_priorisee[jour] + [""] * (max_tasks - len(planif_priorisee[jour]))) for jour in jours_semaine}
     df = pd.DataFrame(table)
-    
-    # Affichage sous forme de tableau
     st.dataframe(df)
