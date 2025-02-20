@@ -380,7 +380,6 @@ elif choix == "Planification Hebdomadaire":
     df = pd.DataFrame(table)
     
     # Affichage du tableau des tâches
-    if st.session_state.tasks:
     df = pd.DataFrame(st.session_state.tasks)
     df_sorted = df.sort_values(by="Priorité", ascending=True)  # Tri par priorité
     st.subheader("Plan d'action")
