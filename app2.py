@@ -341,6 +341,9 @@ elif choix == "Planification Hebdomadaire":
     if "planifications" not in st.session_state:
         st.session_state.planifications = charger_planification()
 
+    # Dictionnaire pour récupérer les indices de priorisation des tâches
+    ordre_priorisation = {tache["nom"]: i for i, tache in enumerate(taches_ordonnee)}  # ✅ NOUVEAU
+
     # Interface pour assigner les tâches aux jours
     for jour in jours_semaine:
         # Liste des tâches disponibles
@@ -350,11 +353,14 @@ elif choix == "Planification Hebdomadaire":
         taches_selectionnees = st.session_state.planifications[jour]
         taches_selectionnees_valides = [tache for tache in taches_selectionnees if tache in options_taches]
     
+        # Trie les tâches sélectionnées selon la priorisation ✅ NOUVEAU
+        taches_selectionnees_valides.sort(key=lambda t: ordre_priorisation.get(t, float("inf")))  
+
         # Met à jour les tâches sélectionnées dans le multiselect avec la liste des options valides
         taches_selectionnees = st.multiselect(
             f"Tâches pour {jour}",
             options=options_taches,
-            default=taches_selectionnees_valides,  # Valeurs actuelles, uniquement celles valides
+            default=taches_selectionnees_valides,  # ✅ Mise à jour avec l'ordre priorisé
             key=f"planif_{jour}"
         )
     
@@ -373,11 +379,15 @@ elif choix == "Planification Hebdomadaire":
     max_tasks = max(len(taches) for taches in st.session_state.planifications.values())
     
     # Reformater les données pour que chaque tâche soit sur une ligne distincte
-    table = {jour: (st.session_state.planifications[jour] + [""] * (max_tasks - len(st.session_state.planifications[jour])))
-             for jour in jours_semaine}
+    table = {
+        jour: (sorted(st.session_state.planifications[jour], key=lambda t: ordre_priorisation.get(t, float("inf")))  # ✅ NOUVEAU
+               + [""] * (max_tasks - len(st.session_state.planifications[jour])))
+        for jour in jours_semaine
+    }
     
     # Création du DataFrame
     df = pd.DataFrame(table)
     
     # Affichage sous forme de tableau
     st.dataframe(df)
+
