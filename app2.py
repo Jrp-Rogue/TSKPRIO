@@ -361,26 +361,34 @@ elif choix == "Planification Hebdomadaire":
         # Mise à jour de la planification
         st.session_state.planifications[jour] = taches_selectionnees
         sauvegarder_planification()  # Sauvegarde après modification
-
-    # 📌 Affichage de la planification sous forme de tableau
-    st.subheader("🗓️ Vue hebdomadaire")
-    
-    # Vérifie que `st.session_state.planifications` existe
-    if "planifications" not in st.session_state:
-        st.session_state.planifications = {jour: [] for jour in jours_semaine}
-    
-    # Trouver le nombre maximum de tâches pour définir le nombre de lignes du tableau
-    max_tasks = max(len(taches) for taches in st.session_state.planifications.values())
-    
-    # Reformater les données pour que chaque tâche soit sur une ligne distincte
-    table = {jour: (st.session_state.planifications[jour] + [""] * (max_tasks - len(st.session_state.planifications[jour])))
-             for jour in jours_semaine}
-    
-    # Création du DataFrame
-    df = pd.DataFrame(table)
-    
-    # Affichage du tableau des tâches
+# Affichage du tableau des tâches
+if st.session_state.tasks:
     df = pd.DataFrame(st.session_state.tasks)
     df_sorted = df.sort_values(by="Priorité", ascending=True)  # Tri par priorité
     st.subheader("Plan d'action")
     st.dataframe(df_sorted)
+
+    # Interface pour supprimer une tâche
+    task_to_remove = st.selectbox("Sélectionner une tâche à supprimer", df_sorted["Tâche"].tolist())
+    if st.button("Supprimer"):
+        index_to_remove = df[df["Tâche"] == task_to_remove].index[0]
+        remove_task(index_to_remove)
+        st.experimental_rerun()
+    
+# Interface pour mettre à jour une tâche
+task_to_update = st.selectbox("Sélectionner une tâche à modifier", df_sorted["Tâche"].tolist())
+index_to_update = df[df["Tâche"] == task_to_update].index[0]
+with st.form("Modifier une tâche"):
+    new_task_name = st.text_input("Nom de la tâche", value=st.session_state.tasks[index_to_update]["Tâche"])
+    new_due_date = st.date_input("Date d'échéance", value=st.session_state.tasks[index_to_update]["Date d'échéance"])
+    new_priority = st.selectbox("Priorité", ["Haute", "Moyenne", "Basse"],
+                                index=["Haute", "Moyenne", "Basse"].index(st.session_state.tasks[index_to_update]["Priorité"]))
+    updated = st.form_submit_button("Mettre à jour")
+    if updated:
+        update_task(index_to_update, new_task_name, new_due_date, new_priority)
+        st.experimental_rerun()
+else:
+    st.write("Aucune tâche pour le moment.")
+
+
+
