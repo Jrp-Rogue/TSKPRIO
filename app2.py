@@ -42,7 +42,7 @@ def charger_planification():
 def sauvegarder_planification():
     with open(PLANIF_FILE, "w") as f:
         json.dump(st.session_state.planifications, f)
-        
+       
 def update_json_files():
     with open(FILE_NAME, "W") as f:
         json.dump(st.session_state.taches, f)
@@ -443,3 +443,7 @@ elif choix == "Planification Hebdomadaire":
     table = {jour: (planif_priorisee[jour] + [""] * (max_tasks - len(planif_priorisee[jour]))) for jour in jours_semaine}
     df = pd.DataFrame(table)
     st.dataframe(df)
+
+if st.button("Enregistrer les fichiers JSON"):
+    upadate_json_files()
+    st.success("Les fichiers JSON ont enregistrés et seront envoyés vers GitHb lors du prochain push.)
