@@ -445,5 +445,5 @@ elif choix == "Planification Hebdomadaire":
     st.dataframe(df)
 
 if st.button("Enregistrer les fichiers JSON"):
-    upadate_json_files()
+    update_json_files()
     st.success("Les fichiers JSON ont enregistrés et seront envoyés vers GitHb lors du prochain push.")
