@@ -42,7 +42,13 @@ def charger_planification():
 def sauvegarder_planification():
     with open(PLANIF_FILE, "w") as f:
         json.dump(st.session_state.planifications, f)
-
+        
+def upadate_json_files():
+    with open(FILE_NAME, "W") as f:
+        json.dump(st.session_state.taches, f)
+    with open(PLANIF_FILE, "w") as f:
+        json.dump(st.sessoin_state.planifications, f)
+        
 # 📌 Titre de l'application
 st.title("📌 Gestionnaire de Tâches")
 
@@ -94,8 +100,9 @@ if choix == "Ajouter une tâche":
             "dependances": dependances
         }
         st.session_state.taches.append(nouvelle_tache)
-        sauvegarder_taches()  # Sauvegarde après ajout ✅
+        update_json_files()
         st.success(f"Tâche '{nom}' ajoutée !")
+        
  
 
     # Affichage de l'erreur si besoin
@@ -142,7 +149,7 @@ elif choix == "Modifier ou supprimer une tâche":
             if tache_temp["nom"].strip():
                 index = st.session_state.taches.index(tache_modifiee)
                 st.session_state.taches[index] = tache_temp  # Remplacement dans la liste
-                sauvegarder_taches()
+                update_json_files()
                 st.success(f"Tâche '{tache_temp['nom']}' modifiée !")
                 st.rerun()
             else:
@@ -156,7 +163,7 @@ elif choix == "Modifier ou supprimer une tâche":
                 st.error(f"Impossible de supprimer cette tâche. Elle est une dépendance pour : {', '.join(taches_dependantes)}.")
             else:
                 st.session_state.taches = [t for t in st.session_state.taches if t["nom"] != tache_selectionnee]
-                sauvegarder_taches()
+                update_json_files()
                 st.success(f"Tâche '{tache_selectionnee}' supprimée !")
                 st.rerun()
 
@@ -360,7 +367,7 @@ elif choix == "Planification Hebdomadaire":
     
         # Mise à jour de la planification
         st.session_state.planifications[jour] = taches_selectionnees
-        sauvegarder_planification()  # Sauvegarde après modification
+        update_json_files()  # Sauvegarde après modification
 
     # 📌 Affichage de la planification sous forme de tableau
     st.subheader("🗓️ Vue hebdomadaire")
