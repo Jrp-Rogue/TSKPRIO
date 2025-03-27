@@ -446,4 +446,4 @@ elif choix == "Planification Hebdomadaire":
 
 if st.button("Enregistrer les fichiers JSON"):
     upadate_json_files()
-    st.success("Les fichiers JSON ont enregistrés et seront envoyés vers GitHb lors du prochain push.)
+    st.success("Les fichiers JSON ont enregistrés et seront envoyés vers GitHb lors du prochain push.")
