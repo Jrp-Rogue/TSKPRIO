@@ -6,9 +6,9 @@ import pandas as pd
 import time
 import gdown
 
-url = "https://drive.google.com/uc?1RrMpS3qs2qtRT749KPWLPyQB-vIQUpDf"
+url = "https://drive.google.com/uc?id=1RrMpS3qs2qtRT749KPWLPyQB-vIQUpDf"
 gdown.download(url, "taches.json", quiet=False)
-url2 = "https://drive.google.com/uc?1NHUcvAUAN2WnSYp2bAkUHA4ZV0-ilgC"
+url2 = "https://drive.google.com/uc?id=1NHUcvAUAN2WnSYp2bAkUHA4ZV0-ilgC"
 gdown.download(url2, "planifications.json", quiet=False)
 # 📌 Nom du fichier pour stocker les tâches et planification
 FILE_NAME = "taches.json"
