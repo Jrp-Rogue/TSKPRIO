@@ -69,7 +69,7 @@ def push_changes():
         # Vérifier si le push a réussi
         st.success("Push réussi !")
     except subprocess.CalledProcessError as e:
-    st.error(f"Erreur lors du push : {e.stderr.decode() if e.stderr else str(e)})
+        st.error(f"Erreur lors du push : {e.stderr.decode() if e.stderr else str(e)}")
     
 
 # 📌 Fonction pour mettre à jour les fichiers JSON et pousser les changements
