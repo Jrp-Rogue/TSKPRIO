@@ -9,7 +9,7 @@ import gdown
 url = "https://drive.google.com/uc?id=1RrMpS3qs2qtRT749KPWLPyQB-vIQUpDf"
 gdown.download(url, "taches.json", quiet=False)
 url = "https://drive.google.com/uc?id=1NHUcvAUAN2WnSYp2bAkUHA4ZV0-ilgC"
-gdown.download(url_2, "planifications.json", quiet=False)
+gdown.download(url, "planifications.json", quiet=False)
 # 📌 Nom du fichier pour stocker les tâches et planification
 FILE_NAME = "taches.json"
 PLANIF_FILE = "planifications.json"
