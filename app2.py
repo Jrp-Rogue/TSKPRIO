@@ -66,7 +66,7 @@ def push_changes():
     result = subprocess.run(['git', 'push'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
 
     # Vérifier si le push a réussi
-    st.success("Push réussi !"
+    st.success("Push réussi !")
 except subprocess.CalledProcessorError as e:
     st.error(f"Erreur lors du push : {e.stderr.decode() if e.stderr else str(e)})
     
