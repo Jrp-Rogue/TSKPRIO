@@ -1,3 +1,4 @@
+import subprocess
 import streamlit as st
 import json
 import os
@@ -40,10 +41,33 @@ def charger_planification():
 def sauvegarder_planification():
     with open(PLANIF_FILE, "w") as f:
         json.dump(st.session_state.planifications, f)
-       
+
+# 📌 Fonction pour effectuer le git push
+def push_changes():
+    # Configurer l'utilisateur git
+    subprocess.run(['git', 'config', '--global', 'user.name', 'Jrp-Rogue'])
+    subprocess.run(['git', 'config', '--global', 'user.email', 'rhogini@gmail.com'])
+
+    # Ajouter les fichiers JSON à l'index
+    subprocess.run(['git', 'add', FILE_NAME, PLANIF_FILE])
+
+    # Committer les changements
+    subprocess.run(['git', 'commit', '-m', 'Update JSON files'])
+
+    # Pousser les changements
+    result = subprocess.run(['git', 'push'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # Vérifier si le push a réussi
+    if result.returncode == 0:
+        print("Push réussi!")
+    else:
+        print(f"Erreur de push: {result.stderr.decode()}")
+
+# 📌 Fonction pour mettre à jour les fichiers JSON et pousser les changements
 def update_json_files():
     sauvegarder_taches()
     sauvegarder_planification()
+    push_changes()  # Pousser les changements vers GitHub
         
 # 📌 Titre de l'application
 st.title("📌 Gestionnaire de Tâches")
