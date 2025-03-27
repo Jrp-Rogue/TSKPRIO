@@ -47,7 +47,7 @@ def update_json_files():
     with open(FILE_NAME, "W") as f:
         json.dump(st.session_state.taches, f)
     with open(PLANIF_FILE, "w") as f:
-        json.dump(st.sessoin_state.planifications, f)
+        json.dump(st.session_state.planifications, f)
         
 # 📌 Titre de l'application
 st.title("📌 Gestionnaire de Tâches")
@@ -100,7 +100,7 @@ if choix == "Ajouter une tâche":
             "dependances": dependances
         }
         st.session_state.taches.append(nouvelle_tache)
-        update_json_files()
+        ()
         st.success(f"Tâche '{nom}' ajoutée !")
         
  
