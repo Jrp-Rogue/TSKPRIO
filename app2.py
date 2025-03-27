@@ -52,21 +52,22 @@ def sauvegarder_planification():
 
 # 📌 Fonction pour effectuer le git push
 def push_changes():
-    # Configurer l'utilisateur git
-    subprocess.run(['git', 'config', '--global', 'user.name', 'Jrp-Rogue'])
-    subprocess.run(['git', 'config', '--global', 'user.email', 'rhogini@gmail.com'])
-
-    # Ajouter les fichiers JSON à l'index
-    subprocess.run(['git', 'add', FILE_NAME, PLANIF_FILE], check=True)
-
-    # Committer les changements
-    subprocess.run(['git', 'commit', '-m', 'Update JSON files'], check=True)
-
-    # Pousser les changements
-    result = subprocess.run(['git', 'push'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-
-    # Vérifier si le push a réussi
-    st.success("Push réussi !")
+    try:
+        # Configurer l'utilisateur git
+        subprocess.run(['git', 'config', '--global', 'user.name', 'Jrp-Rogue'])
+        subprocess.run(['git', 'config', '--global', 'user.email', 'rhogini@gmail.com'])
+    
+        # Ajouter les fichiers JSON à l'index
+        subprocess.run(['git', 'add', FILE_NAME, PLANIF_FILE], check=True)
+    
+        # Committer les changements
+        subprocess.run(['git', 'commit', '-m', 'Update JSON files'], check=True)
+    
+        # Pousser les changements
+        result = subprocess.run(['git', 'push'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+    
+        # Vérifier si le push a réussi
+        st.success("Push réussi !")
     except subprocess.CalledProcessError as e:
     st.error(f"Erreur lors du push : {e.stderr.decode() if e.stderr else str(e)})
     
