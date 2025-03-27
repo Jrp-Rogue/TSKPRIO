@@ -3,8 +3,9 @@ import json
 import os
 import pandas as pd
 
-# 📌 Nom du fichier pour stocker les tâches
+# 📌 Nom du fichier pour stocker les tâches et planification
 FILE_NAME = "taches.json"
+PLANIF_FILE = "planifications.json"
 
 # 📌 Fonction pour charger les tâches depuis le fichier JSON
 def charger_taches():
@@ -24,9 +25,6 @@ def sauvegarder_taches():
     with open(FILE_NAME, "w") as f:
         json.dump(st.session_state.taches, f)
 
-# 📌 Nom du fichier pour stocker la planification
-PLANIF_FILE = "planifications.json"
-
 # 📌 Fonction pour charger la planification depuis le fichier JSON
 def charger_planification():
     if os.path.exists(PLANIF_FILE):
@@ -44,10 +42,8 @@ def sauvegarder_planification():
         json.dump(st.session_state.planifications, f)
        
 def update_json_files():
-    with open(FILE_NAME, "w") as f:
-        json.dump(st.session_state.taches, f)
-    with open(PLANIF_FILE, "w") as f:
-        json.dump(st.session_state.planifications, f)
+    sauvegarder_taches()
+    sauvegarder_planification()
         
 # 📌 Titre de l'application
 st.title("📌 Gestionnaire de Tâches")
@@ -56,15 +52,14 @@ st.title("📌 Gestionnaire de Tâches")
 if "taches" not in st.session_state:
     st.session_state.taches = charger_taches()
 
+# 📌 Chargement des planifications depuis le fichier JSON
+if "planifications" not in st.session_state:
+    st.session_state.planifications = charger_planification()
+
 # 📌 Menu de navigation
 menu = ["Ajouter une tâche", "Modifier ou supprimer une tâche", "Matrice d'Eisenhower", "Plan d'Action", "Planification Hebdomadaire"]
 choix = st.sidebar.selectbox("Sélectionner une option", menu)
 
-import streamlit as st
-
-# 📌 Initialisation correcte des tâches dans session_state
-if "taches" not in st.session_state:
-    st.session_state.taches = []
 
 # 📌 Ajouter une tâche
 if choix == "Ajouter une tâche":
@@ -100,7 +95,7 @@ if choix == "Ajouter une tâche":
             "dependances": dependances
         }
         st.session_state.taches.append(nouvelle_tache)
-        ()
+        update_json_files()
         st.success(f"Tâche '{nom}' ajoutée !")
         
  
@@ -446,4 +441,4 @@ elif choix == "Planification Hebdomadaire":
 
 if st.button("Enregistrer les fichiers JSON"):
     update_json_files()
-    st.success("Les fichiers JSON ont enregistrés et seront envoyés vers GitHb lors du prochain push.")
+    st.success("Les fichiers JSON ont enregistrés et seront envoyés vers GitHub lors du prochain push.")
