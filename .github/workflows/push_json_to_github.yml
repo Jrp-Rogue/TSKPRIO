@@ -1,32 +1,29 @@
 name: Push JSON Files to GitHub
 
-# Déclenche l'action lorsqu'il y a un push dans la branche principale (ou master)
 on:
   push:
     branches:
-      - main  # Changez cela si votre branche par défaut est autre que "main"
-    paths:
-      - "taches.json"
-      - "planifications.json"
+      - main
+  workflow_dispatch:
 
 jobs:
-  push_to_github:
-    runs-on: ubuntu-latest  # Utilisation d'une machine virtuelle Ubuntu
-
+  push_to_git:
+    runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2  # Cloner le dépôt
-
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+        
       - name: Set up Git
         run: |
           git config --global user.name "Jrp-Rogue"
           git config --global user.email "rhogini@gmail.com"
-
-      - name: Add and Commit changes
+        
+      - name: Add and commit changes
         run: |
-          git add .
+          git add FILE_NAME PLANIF_FILE
           git commit -m "Update JSON files" || echo "No changes to commit"
 
-      - name: Push changes
+      - name: Push changes to GitHub
         run: |
-          git push
+          git push origin main
