@@ -8,7 +8,7 @@ import gdown
 
 url = "https://drive.google.com/uc?id=1RrMpS3qs2qtRT749KPWLPyQB-vIQUpDf"
 gdown.download(url, "taches.json", quiet=False)
-url_2 = "https://drive.google.com/uc?id=1NHUcvAUAN2WnSYp2bAkUHA4ZV0-ilgC"
+url = "https://drive.google.com/uc?id=1NHUcvAUAN2WnSYp2bAkUHA4ZV0-ilgC"
 gdown.download(url_2, "planifications.json", quiet=False)
 # 📌 Nom du fichier pour stocker les tâches et planification
 FILE_NAME = "taches.json"
@@ -29,7 +29,7 @@ def charger_taches():
 
 # 📌 Fonction pour sauvegarder les tâches dans le fichier JSON
 def sauvegarder_taches():
-    with open(FILE_NAME, "w") as f:
+    with open(FILE_NAME, "w", encoding="utf-8") as f:
         json.dump(st.session_state.taches, f)
     st.success(f"Les tâches ont été sauvegardées dans {FILE_NAME}.")
 
@@ -46,7 +46,7 @@ def charger_planification():
 
 # 📌 Fonction pour sauvegarder la planification dans le fichier JSON
 def sauvegarder_planification():
-    with open(PLANIF_FILE, "w") as f:
+    with open(PLANIF_FILE, "w", encoding="utf-8") as f:
         json.dump(st.session_state.planifications, f)
     st.success(f"La planification a été sauvegardée dans {PLANIF_FILE}.")
 
@@ -57,19 +57,19 @@ def push_changes():
     subprocess.run(['git', 'config', '--global', 'user.email', 'rhogini@gmail.com'])
 
     # Ajouter les fichiers JSON à l'index
-    subprocess.run(['git', 'add', FILE_NAME, PLANIF_FILE])
+    subprocess.run(['git', 'add', FILE_NAME, PLANIF_FILE], check=True)
 
     # Committer les changements
-    subprocess.run(['git', 'commit', '-m', 'Update JSON files'])
+    subprocess.run(['git', 'commit', '-m', 'Update JSON files'], check=True)
 
     # Pousser les changements
-    result = subprocess.run(['git', 'push'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result = subprocess.run(['git', 'push'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
 
     # Vérifier si le push a réussi
-    if result.returncode == 0:
-        print("Push réussi!")
-    else:
-        print(f"Erreur de push: {result.stderr.decode()}")
+    st.success("Push réussi !"
+except subprocess.CalledProcessorError as e:
+    st.error(f"Erreur lors du push : {e.stderr.decode() if e.stderr else str(e)})
+    
 
 # 📌 Fonction pour mettre à jour les fichiers JSON et pousser les changements
 def update_json_files():
