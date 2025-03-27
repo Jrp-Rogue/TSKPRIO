@@ -43,7 +43,7 @@ def sauvegarder_planification():
     with open(PLANIF_FILE, "w") as f:
         json.dump(st.session_state.planifications, f)
         
-def upadate_json_files():
+def update_json_files():
     with open(FILE_NAME, "W") as f:
         json.dump(st.session_state.taches, f)
     with open(PLANIF_FILE, "w") as f:
