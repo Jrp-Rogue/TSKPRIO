@@ -26,6 +26,7 @@ def charger_taches():
 def sauvegarder_taches():
     with open(FILE_NAME, "w") as f:
         json.dump(st.session_state.taches, f)
+    st.success(f"Les tâches ont été sauvegardées dans {FILE_NAME}.")
 
 # 📌 Fonction pour charger la planification depuis le fichier JSON
 def charger_planification():
@@ -42,6 +43,7 @@ def charger_planification():
 def sauvegarder_planification():
     with open(PLANIF_FILE, "w") as f:
         json.dump(st.session_state.planifications, f)
+    st.success(f"La planification a été sauvegardée dans {PLANIF_FILE}.")
 
 # 📌 Fonction pour effectuer le git push
 def push_changes():
