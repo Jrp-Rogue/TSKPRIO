@@ -436,3 +436,27 @@ elif choix == "Planification Hebdomadaire":
     table = {jour: (planif_priorisee[jour] + [""] * (max_tasks - len(planif_priorisee[jour]))) for jour in jours_semaine}
     df = pd.DataFrame(table)
     st.dataframe(df)
+
+name: Push JSON Files to GitHub
+
+on:
+  push:
+    paths:
+      - "taches.json"
+      - "planifications.json"
+
+jobs:
+  push_to_github:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Commit and Push changes
+        run: |
+          git config user.name "Jrp-Rogue"
+          git config user.email "rhogini@gmail.com"
+          git add .
+          git commit -m "Update JSON files"
+          git push
+
