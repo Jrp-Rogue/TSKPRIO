@@ -22,17 +22,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd TSKPRIO  # Se placer dans le sous-dossier où se trouve ton setup.py
+          cd TSKPRIO  # Se placer dans le sous-dossier contenant setup.py
           pip install .
 
-      - name: Run Streamlit app (for test)
+      - name: Add and commit changes
         run: |
-          cd TSKPRIO  # Se placer dans le sous-dossier contenant app2.py
-          streamlit run app2.py
-
-      - name: Add and commit JSON changes
-        run: |
-          cd TSKPRIO  # Se placer dans le sous-dossier contenant les fichiers JSON
+          cd TSKPRIO  # Se placer dans le sous-dossier contenant tes fichiers JSON
           git add taches.json planifications.json
           git commit -m "Update JSON files" || echo "No changes to commit"
 
