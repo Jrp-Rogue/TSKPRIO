@@ -1,5 +1,5 @@
 matplotlib
 numpy
 gitpython
-git+https://github.com/Jrp-Rogue/TSKPRIO.git@5b7c178afed1975eb9515477d464a6ebb63ca778#egg=TSKPRIO
+git+https://github.com/Jrp-Rogue/TSKPRIO.git#egg=TSKPRIO
 pandas
