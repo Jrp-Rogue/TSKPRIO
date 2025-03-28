@@ -23,7 +23,7 @@ else:
         planif_file = 'planification.json'
 
         # Ajouter, committer et pousser les changements
-        run(['git', 'add', file_name, planif_file])
+        run(['git', 'add', FILE_NAME, PLANIF_FILE])
         run(['git', 'commit', '-m', 'Update JSON files'])
         run(['git', 'push', 'origin', 'main'])
 
