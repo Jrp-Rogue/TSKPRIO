@@ -1,7 +1,6 @@
 matplotlib
 numpy
 gitpython
-git+https://github.com/Jrp-Rogue/TSKPRIO.git@ded1d5f18f98ab1eec042dc7361402ca83903eb2#egg=TSKPRIO&subdirectory=TSKPRIO
 streamlit
 pandas
 
