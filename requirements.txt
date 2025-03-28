@@ -2,7 +2,7 @@ matplotlib
 numpy
 gitpython
 git+https://$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}@github.com/Jrp-Rogue/TSKPRIO.git
-streamlit
-pandas
-gdown
+streamlit==1.15.0  # Assure-toi d'avoir la version que tu utilises
+pandas==1.3.3  # Exemple de version compatible
+gdown==4.4.0  # Si tu utilises gdown
 subprocess
