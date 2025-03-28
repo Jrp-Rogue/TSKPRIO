@@ -1,6 +1,8 @@
-streamlit
 matplotlib
 numpy
 gitpython
-gdown
 git+https://$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}@github.com/Jrp-Rogue/TSKPRIO.git
+streamlit
+pandas
+gdown
+subprocess
