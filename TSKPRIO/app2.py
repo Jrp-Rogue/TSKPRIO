@@ -95,7 +95,6 @@ def push_changes():
 def update_json_files():
     sauvegarder_taches()
     sauvegarder_planification()
-    time.sleep(1)
     push_changes()  # Pousser les changements vers GitHub
         
 # 📌 Titre de l'application
