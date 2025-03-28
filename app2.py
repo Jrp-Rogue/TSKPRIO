@@ -5,7 +5,31 @@ import os
 import pandas as pd
 import time
 import gdown
+from subprocess import run
 
+# Récupère le token GitHub depuis les secrets de Streamlit
+github_token = os.getenv('GITHUB_TOKEN')
+
+# Assurer que le token GitHub existe
+if not github_token:
+    st.error("GitHub token is missing. Please make sure the 'GITHUB_TOKEN' is set in Streamlit secrets.")
+else:
+    try:
+        # Configurer l'authentification Git avec HTTPS et le token GitHub
+        run(['git', 'config', '--global', 'url.https://{}@github.com'.format(github_token), 'insteadOf', 'https://github.com'])
+
+        # Chemins des fichiers à ajouter (remplacer par tes fichiers spécifiques)
+        file_name = 'data.json'
+        planif_file = 'planification.json'
+
+        # Ajouter, committer et pousser les changements
+        run(['git', 'add', file_name, planif_file])
+        run(['git', 'commit', '-m', 'Update JSON files'])
+        run(['git', 'push', 'origin', 'main'])
+
+        st.success("Push réussi !")
+    except subprocess.CalledProcessError as e:
+        st.error(f"Erreur lors du push : {e.stderr.decode() if e.stderr else str(e)}")
 # 📌 Nom du fichier pour stocker les tâches et planification
 FILE_NAME = "taches.json"
 PLANIF_FILE = "planifications.json"
