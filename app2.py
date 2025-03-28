@@ -10,7 +10,7 @@ FILE_NAME = "taches.json"
 PLANIF_FILE = "planifications.json"
 
 # Récupère le token GitHub depuis les secrets de Streamlit
-github_token = os.getenv('GITHUB_TOKEN')
+github_token = st.secrets["general"]["GITHUB_TOKEN"]
 
 # Assurer que le token GitHub existe
 if not github_token:
@@ -21,8 +21,8 @@ else:
         run(['git', 'config', '--global', 'url.https://{}@github.com'.format(github_token), 'insteadOf', 'https://github.com'])
 
         # Chemins des fichiers à ajouter (remplacer par tes fichiers spécifiques)
-        file_name = 'data.json'
-        planif_file = 'planification.json'
+        FILE_NAME = 'taches.json'
+        PLANIF_FILE = 'planifications.json'
 
         # Ajouter, committer et pousser les changements
         run(['git', 'add', FILE_NAME, PLANIF_FILE])
@@ -32,7 +32,6 @@ else:
         st.success("Push réussi !")
     except subprocess.CalledProcessError as e:
         st.error(f"Erreur lors du push : {e.stderr.decode() if e.stderr else str(e)}")
-
 
 # 📌 Fonction pour charger les tâches depuis le fichier JSON
 def charger_taches():
