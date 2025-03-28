@@ -14,22 +14,25 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
-      - name: Set up Git
+      - name: Set up Git and add GitHub to known hosts
         run: |
           git config --global user.name "Jrp-Rogue"
           git config --global user.email "rhogini@gmail.com"
+          # Ajouter GitHub aux hôtes connus pour éviter le problème "Host key verification failed"
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Install dependencies
         run: |
-          cd TSKPRIO  # Navigue dans le sous-dossier
-          pip install .  # Installe le projet à partir de setup.py ou pyproject.toml
+          cd TSKPRIO  # Se placer dans le sous-dossier qui contient ton code et setup.py
+          pip install .
 
       - name: Add and commit changes
         run: |
-          cd TSKPRIO  # Assure-toi d'être dans le sous-dossier
-          git add taches.json planifications.json  # Remplace par tes fichiers spécifiques
+          cd TSKPRIO  # Se placer dans le sous-dossier où se trouvent les fichiers JSON
+          git add taches.json planifications.json
           git commit -m "Update JSON files" || echo "No changes to commit"
 
       - name: Push changes to GitHub
         run: |
-          git push origin main  # Assure-toi que la branche est correcte
+          cd TSKPRIO  # Optionnel, si tes fichiers sont dans ce sous-dossier
+          git push origin main
