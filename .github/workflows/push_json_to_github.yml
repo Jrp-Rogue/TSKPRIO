@@ -13,12 +13,14 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
-      - name: Set up Git and add GitHub to known hosts
+      - name: Set up SSH key for GitHub
         run: |
-          git config --global user.name "Jrp-Rogue"
-          git config --global user.email "rhogini@gmail.com"
           mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Install dependencies
         run: |
