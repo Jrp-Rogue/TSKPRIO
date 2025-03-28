@@ -13,25 +13,17 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
-
-      - name: Set up SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-        
+      
       - name: Set up Git
         run: |
           git config --global user.name "Jrp-Rogue"
           git config --global user.email "rhogini@gmail.com"
-
+      
       - name: Add and commit changes
         run: |
-          git add FILE_NAME PLANIF_FILE
+          git add data.json planifications.json  # Remplacer par les fichiers spécifiques
           git commit -m "Update JSON files" || echo "No changes to commit"
-
+      
       - name: Push changes to GitHub
         run: |
-          git remote set-url origin git@github.com:Jrp-Rogue/ton-repo.git
-          git push origin main
+          git push origin main  # Remplacer par la branche correcte si nécessaire
