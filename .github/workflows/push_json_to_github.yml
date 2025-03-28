@@ -13,17 +13,30 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
-      
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'  # Spécifie la version de Python que tu veux utiliser
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt  # Installe toutes les dépendances listées dans requirements.txt
+
       - name: Set up Git
         run: |
           git config --global user.name "Jrp-Rogue"
           git config --global user.email "rhogini@gmail.com"
-      
+
       - name: Add and commit changes
         run: |
           git add data.json planifications.json  # Remplacer par les fichiers spécifiques
           git commit -m "Update JSON files" || echo "No changes to commit"
-      
+
       - name: Push changes to GitHub
         run: |
           git push origin main  # Remplacer par la branche correcte si nécessaire
+
+      - name: Run Streamlit app
+        run: |
+          streamlit run TSKPRIO/app2.py  # Lancer ton application Streamlit
