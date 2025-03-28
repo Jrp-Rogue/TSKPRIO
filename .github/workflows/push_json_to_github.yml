@@ -27,7 +27,7 @@ jobs:
       - name: Add and commit changes
         run: |
           cd TSKPRIO  # Assure-toi d'être dans le sous-dossier
-          git add data.json planifications.json  # Remplace par tes fichiers spécifiques
+          git add taches.json planifications.json  # Remplace par tes fichiers spécifiques
           git commit -m "Update JSON files" || echo "No changes to commit"
 
       - name: Push changes to GitHub
