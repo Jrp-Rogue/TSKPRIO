@@ -3,8 +3,6 @@ import streamlit as st
 import json
 import os
 import pandas as pd
-import time
-import gdown
 from subprocess import run
 
 # 📌 Nom du fichier pour stocker les tâches et planification
