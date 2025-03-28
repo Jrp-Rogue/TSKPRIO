@@ -7,6 +7,10 @@ import time
 import gdown
 from subprocess import run
 
+# 📌 Nom du fichier pour stocker les tâches et planification
+FILE_NAME = "taches.json"
+PLANIF_FILE = "planifications.json"
+
 # Récupère le token GitHub depuis les secrets de Streamlit
 github_token = os.getenv('GITHUB_TOKEN')
 
@@ -30,9 +34,7 @@ else:
         st.success("Push réussi !")
     except subprocess.CalledProcessError as e:
         st.error(f"Erreur lors du push : {e.stderr.decode() if e.stderr else str(e)}")
-# 📌 Nom du fichier pour stocker les tâches et planification
-FILE_NAME = "taches.json"
-PLANIF_FILE = "planifications.json"
+
 
 # 📌 Fonction pour charger les tâches depuis le fichier JSON
 def charger_taches():
