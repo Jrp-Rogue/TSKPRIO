@@ -1,37 +1,10 @@
-import subprocess
 import streamlit as st
 import json
 import os
 import pandas as pd
-from subprocess import run
 
-# 📌 Nom du fichier pour stocker les tâches et planification
+# 📌 Nom du fichier pour stocker les tâches
 FILE_NAME = "taches.json"
-PLANIF_FILE = "planifications.json"
-
-# Récupère le token GitHub depuis les secrets de Streamlit
-github_token = st.secrets["general"]["GITHUB_TOKEN"]
-
-# Assurer que le token GitHub existe
-if not github_token:
-    st.error("GitHub token is missing. Please make sure the 'GITHUB_TOKEN' is set in Streamlit secrets.")
-else:
-    try:
-        # Configurer l'authentification Git avec HTTPS et le token GitHub
-        run(['git', 'config', '--global', 'url.https://{}@github.com'.format(github_token), 'insteadOf', 'https://github.com'])
-
-        # Chemins des fichiers à ajouter (remplacer par tes fichiers spécifiques)
-        FILE_NAME = 'taches.json'
-        PLANIF_FILE = 'planifications.json'
-
-        # Ajouter, committer et pousser les changements
-        run(['git', 'add', FILE_NAME, PLANIF_FILE])
-        run(['git', 'commit', '-m', 'Update JSON files'])
-        run(['git', 'push', 'origin', 'main'])
-
-        st.success("Push réussi !")
-    except subprocess.CalledProcessError as e:
-        st.error(f"Erreur lors du push : {e.stderr.decode() if e.stderr else str(e)}")
 
 # 📌 Fonction pour charger les tâches depuis le fichier JSON
 def charger_taches():
@@ -48,9 +21,11 @@ def charger_taches():
 
 # 📌 Fonction pour sauvegarder les tâches dans le fichier JSON
 def sauvegarder_taches():
-    with open(FILE_NAME, "w", encoding="utf-8") as f:
+    with open(FILE_NAME, "w") as f:
         json.dump(st.session_state.taches, f)
-    st.success(f"Les tâches ont été sauvegardées dans {FILE_NAME}.")
+
+# 📌 Nom du fichier pour stocker la planification
+PLANIF_FILE = "planifications.json"
 
 # 📌 Fonction pour charger la planification depuis le fichier JSON
 def charger_planification():
@@ -65,39 +40,9 @@ def charger_planification():
 
 # 📌 Fonction pour sauvegarder la planification dans le fichier JSON
 def sauvegarder_planification():
-    with open(PLANIF_FILE, "w", encoding="utf-8") as f:
+    with open(PLANIF_FILE, "w") as f:
         json.dump(st.session_state.planifications, f)
-    st.success(f"La planification a été sauvegardée dans {PLANIF_FILE}.")
 
-# 📌 Fonction pour effectuer le git push
-def push_changes():
-    try:
-        # Configurer l'utilisateur git
-        subprocess.run(['git', 'config', '--global', 'user.name', 'Jrp-Rogue'])
-        subprocess.run(['git', 'config', '--global', 'user.email', 'rhogini@gmail.com'])
-    
-        # Ajouter les fichiers JSON à l'index
-        subprocess.run(['git', 'add', FILE_NAME, PLANIF_FILE], check=True)
-    
-        # Committer les changements
-        subprocess.run(['git', 'commit', '-m', 'Update JSON files'], check=True)
-    
-        # Pousser les changements
-        result = subprocess.run(['git', 'push'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-    
-        # Vérifier si le push a réussi
-        st.success("Push réussi !")
-    except subprocess.CalledProcessError as e:
-        st.error(f"Erreur lors du push : {e.stderr.decode() if e.stderr else str(e)}")
-    
-
-# 📌 Fonction pour mettre à jour les fichiers JSON et pousser les changements
-def update_json_files():
-    sauvegarder_taches()
-    sauvegarder_planification()
-    time.sleep(1)
-    push_changes()  # Pousser les changements vers GitHub
-        
 # 📌 Titre de l'application
 st.title("📌 Gestionnaire de Tâches")
 
@@ -105,14 +50,15 @@ st.title("📌 Gestionnaire de Tâches")
 if "taches" not in st.session_state:
     st.session_state.taches = charger_taches()
 
-# 📌 Chargement des planifications depuis le fichier JSON
-if "planifications" not in st.session_state:
-    st.session_state.planifications = charger_planification()
-
 # 📌 Menu de navigation
 menu = ["Ajouter une tâche", "Modifier ou supprimer une tâche", "Matrice d'Eisenhower", "Plan d'Action", "Planification Hebdomadaire"]
 choix = st.sidebar.selectbox("Sélectionner une option", menu)
 
+import streamlit as st
+
+# 📌 Initialisation correcte des tâches dans session_state
+if "taches" not in st.session_state:
+    st.session_state.taches = []
 
 # 📌 Ajouter une tâche
 if choix == "Ajouter une tâche":
@@ -148,9 +94,8 @@ if choix == "Ajouter une tâche":
             "dependances": dependances
         }
         st.session_state.taches.append(nouvelle_tache)
-        update_json_files()
+        sauvegarder_taches()  # Sauvegarde après ajout ✅
         st.success(f"Tâche '{nom}' ajoutée !")
-        
  
 
     # Affichage de l'erreur si besoin
@@ -197,7 +142,7 @@ elif choix == "Modifier ou supprimer une tâche":
             if tache_temp["nom"].strip():
                 index = st.session_state.taches.index(tache_modifiee)
                 st.session_state.taches[index] = tache_temp  # Remplacement dans la liste
-                update_json_files()
+                sauvegarder_taches()
                 st.success(f"Tâche '{tache_temp['nom']}' modifiée !")
                 st.rerun()
             else:
@@ -211,7 +156,7 @@ elif choix == "Modifier ou supprimer une tâche":
                 st.error(f"Impossible de supprimer cette tâche. Elle est une dépendance pour : {', '.join(taches_dependantes)}.")
             else:
                 st.session_state.taches = [t for t in st.session_state.taches if t["nom"] != tache_selectionnee]
-                update_json_files()
+                sauvegarder_taches()
                 st.success(f"Tâche '{tache_selectionnee}' supprimée !")
                 st.rerun()
 
@@ -415,7 +360,7 @@ elif choix == "Planification Hebdomadaire":
     
         # Mise à jour de la planification
         st.session_state.planifications[jour] = taches_selectionnees
-        update_json_files()  # Sauvegarde après modification
+        sauvegarder_planification()  # Sauvegarde après modification
 
     # 📌 Affichage de la planification sous forme de tableau
     st.subheader("🗓️ Vue hebdomadaire")
@@ -491,7 +436,3 @@ elif choix == "Planification Hebdomadaire":
     table = {jour: (planif_priorisee[jour] + [""] * (max_tasks - len(planif_priorisee[jour]))) for jour in jours_semaine}
     df = pd.DataFrame(table)
     st.dataframe(df)
-
-if st.button("Enregistrer les fichiers JSON"):
-    update_json_files()
-    st.success("Les fichiers JSON ont enregistrés et seront envoyés vers GitHub lors du prochain push.")
