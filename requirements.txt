@@ -3,3 +3,4 @@ matplotlib
 numpy
 gitpython
 gdown
+git+https://${GITHUB_TOKEN}@github.com/Jrp-Rogue/TSKPRIO.git
