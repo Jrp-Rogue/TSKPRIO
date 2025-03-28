@@ -18,21 +18,25 @@ jobs:
         run: |
           git config --global user.name "Jrp-Rogue"
           git config --global user.email "rhogini@gmail.com"
-          # Ajouter GitHub aux hôtes connus pour éviter le problème "Host key verification failed"
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Install dependencies
         run: |
-          cd TSKPRIO  # Se placer dans le sous-dossier qui contient ton code et setup.py
+          cd TSKPRIO  # Se placer dans le sous-dossier où se trouve ton setup.py
           pip install .
 
-      - name: Add and commit changes
+      - name: Run Streamlit app (for test)
         run: |
-          cd TSKPRIO  # Se placer dans le sous-dossier où se trouvent les fichiers JSON
+          cd TSKPRIO  # Se placer dans le sous-dossier contenant app2.py
+          streamlit run app2.py
+
+      - name: Add and commit JSON changes
+        run: |
+          cd TSKPRIO  # Se placer dans le sous-dossier contenant les fichiers JSON
           git add taches.json planifications.json
           git commit -m "Update JSON files" || echo "No changes to commit"
 
       - name: Push changes to GitHub
         run: |
-          cd TSKPRIO  # Optionnel, si tes fichiers sont dans ce sous-dossier
+          cd TSKPRIO
           git push origin main
