@@ -1,7 +1,7 @@
 matplotlib
 numpy
 gitpython
-git+https://github.com/Jrp-Rogue/TSKPRIO.git@83747da51e3c1c9283c1495450d4e3dfd7babba6#egg=TSKPRIO
+git+https://github.com/Jrp-Rogue/TSKPRIO.git@ded1d5f18f98ab1eec042dc7361402ca83903eb2#egg=TSKPRIO
 streamlit==1.15.0
 pandas==1.3.3
 gdown==4.4.0
