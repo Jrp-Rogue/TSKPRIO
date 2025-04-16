@@ -337,30 +337,44 @@ elif choix == "Planification Hebdomadaire":
 
     jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
-    # Initialisation de l'état si non existant
+    # Chargement et initialisation de la planification
     if "planifications" not in st.session_state:
-        st.session_state.planifications = charger_planification()
+        planif_chargee = charger_planification()
 
-    # Interface pour assigner les tâches aux jours
+        # Vérifie que c'est bien un dict avec les jours comme clés
+        if not isinstance(planif_chargee, dict):
+            planif_chargee = {jour: [] for jour in jours_semaine}
+        else:
+            # Ajoute les jours manquants s'ils n'existent pas dans la structure chargée
+            for jour in jours_semaine:
+                if jour not in planif_chargee:
+                    planif_chargee[jour] = []
+
+        st.session_state.planifications = planif_chargee
+
+    # Interface utilisateur
     for jour in jours_semaine:
-        # Liste des tâches disponibles
         options_taches = [t["nom"] for t in st.session_state.taches]
-        
-        # Récupère les tâches sélectionnées pour ce jour, et filtre les tâches supprimées
-        taches_selectionnees = st.session_state.planifications[jour]
+
+        # Récupère les tâches enregistrées pour ce jour
+        taches_selectionnees = st.session_state.planifications.get(jour, [])
+        # Ne garde que celles encore disponibles
         taches_selectionnees_valides = [tache for tache in taches_selectionnees if tache in options_taches]
-    
-        # Met à jour les tâches sélectionnées dans le multiselect avec la liste des options valides
-        taches_selectionnees = st.multiselect(
+
+        # Interface multiselect
+        nouvelles_taches = st.multiselect(
             f"Tâches pour {jour}",
             options=options_taches,
-            default=taches_selectionnees_valides,  # Valeurs actuelles, uniquement celles valides
+            default=taches_selectionnees_valides,
             key=f"planif_{jour}"
         )
-    
+
         # Mise à jour de la planification
-        st.session_state.planifications[jour] = taches_selectionnees
-        sauvegarder_planification()  # Sauvegarde après modification
+        st.session_state.planifications[jour] = nouvelles_taches
+
+    # Sauvegarde après la boucle (une seule fois)
+    sauvegarder_planification()
+
 
     # 📌 Affichage de la planification sous forme de tableau
     st.subheader("🗓️ Vue hebdomadaire")
